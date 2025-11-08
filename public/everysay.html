@@ -1,0 +1,281 @@
+ween mb-3">
+        <h2 class="text-lg font-semibold">나의 고백 피드</h2>
+        <button id="btnExportMeta" class="px-3 py-1.5 rounded-xl border border-neutral-700 text-sm hover:bg-neutral-800">메타데이터 내보내기(JSON)</button>
+      </div>
+      <div id="feed" class="space-y-3"></div>
+      <p id="emptyState" class="text-neutral-400 text-sm">아직 저장된 고백이 없습니다. 위에서 녹음하고 “저장”을 눌러보세요.</p>
+    </section>
+
+    <footer class="mt-10 text-xs text-neutral-500">EVERYSAY Prototype v0 • 로컬 IndexedDB에 저장됩니다.</footer>
+  </div>
+
+<script>
+  // ——— 유틸 & 상태 ———
+  const $ = (sel) => document.querySelector(sel);
+  const state = { mediaRecorder: null, chunks: [], stream: null, analyser: null, raf: null, startAt: 0, blob: null, duration: 0 };
+
+  // IndexedDB 래퍼
+  const DB_NAME = 'everysay';
+  const STORE = 'clips';
+  function openDB() {
+    return new Promise((resolve, reject) => {
+      const req = indexedDB.open(DB_NAME, 1);
+      req.onupgradeneeded = () => {
+        const db = req.result;
+        if (!db.objectStoreNames.contains(STORE)) {
+          db.createObjectStore(STORE, { keyPath: 'id', autoIncrement: true });
+        }
+      };
+      req.onsuccess = () => resolve(req.result);
+      req.onerror = () => reject(req.error);
+    });
+  }
+  async function saveClip(rec) {
+    const db = await openDB();
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction(STORE, 'readwrite');
+      tx.objectStore(STORE).add(rec).onsuccess = (e) => resolve(e.target.result);
+      tx.onerror = () => reject(tx.error);
+    });
+  }
+  async function allClips() {
+    const db = await openDB();
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction(STORE, 'readonly');
+      const req = tx.objectStore(STORE).getAll();
+      req.onsuccess = () => resolve(req.result);
+      req.onerror = () => reject(req.error);
+    });
+  }
+  async function removeClip(id) {
+    const db = await openDB();
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction(STORE, 'readwrite');
+      tx.objectStore(STORE).delete(id).onsuccess = () => resolve();
+      tx.onerror = () => reject(tx.error);
+    });
+  }
+
+  // ——— 파형 시각화 ———
+  const canvas = $('#viz');
+  const ctx = canvas.getContext('2d');
+  function resizeCanvas() {
+    canvas.width = canvas.clientWidth * window.devicePixelRatio;
+    canvas.height = canvas.clientHeight * window.devicePixelRatio;
+  }
+  resizeCanvas();
+  window.addEventListener('resize', resizeCanvas);
+
+  function draw() {
+    const { analyser } = state;
+    if (!analyser) return;
+    const bufferLen = analyser.frequencyBinCount;
+    const data = new Uint8Array(bufferLen);
+    analyser.getByteTimeDomainData(data);
+
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    ctx.lineWidth = 2 * window.devicePixelRatio;
+    ctx.strokeStyle = '#f472b6';
+    ctx.beginPath();
+
+    const sliceWidth = canvas.width / bufferLen;
+    let x = 0;
+    for (let i = 0; i < bufferLen; i++) {
+      const v = data[i] / 128.0; // 0~2
+      const y = (v * canvas.height) / 2;
+      if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+      x += sliceWidth;
+    }
+    ctx.lineTo(canvas.width, canvas.height/2);
+    ctx.stroke();
+
+    state.raf = requestAnimationFrame(draw);
+  }
+
+  // ——— 타이머 ———
+  const timerEl = $('#timer');
+  let timerInt = null;
+  function startTimer() {
+    state.startAt = Date.now();
+    timerInt = setInterval(() => {
+      const s = Math.floor((Date.now() - state.startAt) / 1000);
+      state.duration = s;
+      const mm = String(Math.floor(s/60)).padStart(2,'0');
+      const ss = String(s%60).padStart(2,'0');
+      timerEl.textContent = `${mm}:${ss}`;
+    }, 200);
+  }
+  function stopTimer() { clearInterval(timerInt); }
+
+  // ——— 녹음 제어 ———
+  const btnStart = $('#btnStart');
+  const btnStop  = $('#btnStop');
+  const btnSave  = $('#btnSave');
+  const preview  = $('#preview');
+
+  btnStart.addEventListener('click', async () => {
+    try {
+      state.stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      const source = audioCtx.createMediaStreamSource(state.stream);
+      const analyser = audioCtx.createAnalyser();
+      analyser.fftSize = 2048;
+      source.connect(analyser);
+      state.analyser = analyser;
+      draw();
+
+      state.chunks = [];
+      state.mediaRecorder = new MediaRecorder(state.stream);
+      state.mediaRecorder.ondataavailable = (e) => state.chunks.push(e.data);
+      state.mediaRecorder.onstop = () => {
+        const blob = new Blob(state.chunks, { type: 'audio/webm' });
+        state.blob = blob;
+        const url = URL.createObjectURL(blob);
+        preview.src = url;
+        btnSave.disabled = false;
+      };
+      state.mediaRecorder.start();
+
+      btnStart.disabled = true;
+      btnStop.disabled = false;
+      btnSave.disabled = true;
+      startTimer();
+    } catch (err) {
+      alert('마이크 권한이 필요합니다. 이 페이지는 https(또는 localhost)에서 열어야 합니다.');
+      console.error(err);
+    }
+  });
+
+  btnStop.addEventListener('click', () => {
+    if (state.mediaRecorder && state.mediaRecorder.state !== 'inactive') {
+      state.mediaRecorder.stop();
+    }
+    if (state.stream) state.stream.getTracks().forEach(t => t.stop());
+    cancelAnimationFrame(state.raf);
+    stopTimer();
+    btnStart.disabled = false;
+    btnStop.disabled = true;
+  });
+
+  btnSave.addEventListener('click', async () => {
+    if (!state.blob) return;
+    const emotion = $('#emotion').value;
+    const note = $('#note').value.trim();
+    const createdAt = new Date().toISOString();
+
+    const rec = { createdAt, emotion, note, duration: state.duration, blob: state.blob };
+    await saveClip(rec);
+    state.blob = null;
+    btnSave.disabled = true;
+    preview.removeAttribute('src');
+    $('#note').value = '';
+
+    await renderFeed();
+  });
+
+  // ——— 피드 렌더링 & 통계 ———
+  function fmtTime(iso) {
+    const d = new Date(iso);
+    const mm = String(d.getMonth()+1).padStart(2,'0');
+    const dd = String(d.getDate()).padStart(2,'0');
+    const hh = String(d.getHours()).padStart(2,'0');
+    const mi = String(d.getMinutes()).padStart(2,'0');
+    return `${d.getFullYear()}.${mm}.${dd} ${hh}:${mi}`;
+  }
+  function ymd(date) { return date.toISOString().slice(0,10); }
+
+  async function renderFeed() {
+    const list = await allClips();
+    const feed = $('#feed');
+    feed.innerHTML = '';
+
+    // 통계
+    const todayStr = ymd(new Date());
+    let today = 0;
+    const daysSet = new Set();
+    list.forEach(it => {
+      const d = ymd(new Date(it.createdAt));
+      daysSet.add(d);
+      if (d === todayStr) today++;
+    });
+
+    // streak 계산 (오늘부터 과거로 연속되는 날짜 수)
+    let streak = 0;
+    const dayMs = 24*60*60*1000;
+    let cursor = new Date();
+    while (daysSet.has(ymd(cursor))) {
+      streak++;
+      cursor = new Date(cursor.getTime() - dayMs);
+    }
+
+    $('#todayCount').textContent = today;
+    $('#totalCount').textContent = list.length;
+    $('#streakCount').textContent = streak;
+
+    $('#emptyState').style.display = list.length ? 'none' : 'block';
+
+    // 최신 먼저
+    list.sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+    for (const item of list) {
+      const url = URL.createObjectURL(item.blob);
+      const card = document.createElement('div');
+      card.className = 'rounded-2xl border border-neutral-800 p-4';
+      card.innerHTML = `
+        <div class="flex flex-col sm:flex-row sm:items-center gap-3 justify-between">
+          <div>
+            <div class="text-sm text-neutral-400">${fmtTime(item.createdAt)} • ${item.duration}s</div>
+            <div class="mt-0.5 font-medium">#${item.emotion} ${item.note ? '– '+escapeHtml(item.note) : ''}</div>
+          </div>
+          <div class="flex items-center gap-2">
+            <audio controls src="${url}" class="w-56"></audio>
+            <a download="everysay-${item.id||'clip'}.webm" href="${url}" class="px-3 py-1.5 rounded-xl border border-neutral-700 text-sm hover:bg-neutral-800">다운로드</a>
+            <button data-id="${item.id}" class="btn-del px-3 py-1.5 rounded-xl border border-red-500/40 text-red-300 text-sm hover:bg-red-500/10">삭제</button>
+          </div>
+        </div>`;
+      feed.appendChild(card);
+    }
+
+    // 삭제 핸들러
+    document.querySelectorAll('.btn-del').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const id = Number(btn.getAttribute('data-id'));
+        await removeClip(id);
+        await renderFeed();
+      });
+    });
+  }
+
+  function escapeHtml(s){
+    return s.replace(/[&<>"']/g, (c)=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]));
+  }
+
+  // ——— 내보내기 (메타데이터만) ———
+  $('#btnExportMeta').addEventListener('click', async () => {
+    const list = await allClips();
+    const meta = list.map(({id, createdAt, emotion, note, duration}) => ({id, createdAt, emotion, note, duration}));
+    const blob = new Blob([JSON.stringify({ app: 'EVERYSAY', exportedAt: new Date().toISOString(), meta }, null, 2)], {type:'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'everysay-export.json'; a.click();
+    URL.revokeObjectURL(url);
+  });
+
+  // ——— 테마 전환 ———
+  $('#toggle-theme').addEventListener('click', () => {
+    const root = document.documentElement;
+    const dark = root.classList.toggle('light');
+    if (root.classList.contains('light')) {
+      document.body.classList.remove('bg-neutral-950','text-neutral-100');
+      document.body.classList.add('bg-white','text-neutral-900');
+    } else {
+      document.body.classList.add('bg-neutral-950','text-neutral-100');
+      document.body.classList.remove('bg-white','text-neutral-900');
+    }
+  });
+
+  // 초기 렌더
+  renderFeed();
+</script>
+</body>
+</html>

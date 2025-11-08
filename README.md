@@ -1,16 +1,13 @@
-# React + Vite
+# EVERYSAY Prototype
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+EVERYSAY is a **voice-based emotional support platform**  
+where people can send and record messages of encouragement,  
+and transform emotional voice data into global cheer culture.
 
-Currently, two official plugins are available:
+- Built with **React + Supabase + Vercel**
+- Users can record, store, and send supportive messages
+- Audio is locally stacked and safely deleted after 30 days
+- Prototype version: November 2025
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
-
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+👉 Live Demo: https://every-say-prototype.vercel.app  
+👉 Repository: https://github.com/beearth/EverySayPrototype

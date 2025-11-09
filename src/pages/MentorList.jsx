@@ -5,9 +5,23 @@ import CheerModal from "../components/CheerModal";
 import VideoGalleryModal from "../components/VideoGalleryModal";
 import MyStackFeed from "../components/MyStackFeed";
 
-/* ──────────────────────────────────────────────────────────
+/* ───── 텍스트 한방 교체용 상수 ───── */
+const TITLE = "EVERYSAY Cheer Hub"; // ← 여기서 바꾸면 헤더 제목 변경
+const SEARCH_PH = "Search mentors, causes, or events"; // 검색창 placeholder
+const CATEGORIES = [
+  "Fandom",
+  "Health",
+  "Education",
+  "Local",
+  "Sports",
+  "Non-profit",
+  "Children",
+  "Emerging Creators",
+];
+
+/* ─────────────────────────────────────────
    Filter out non-existing files (404) for the video modal
-   ────────────────────────────────────────────────────────── */
+   ───────────────────────────────────────── */
 async function filterExisting(list) {
   const tested = await Promise.all(
     list.map(async (v) => {
@@ -40,8 +54,7 @@ export default function MentorList() {
       subtitle: i % 2 === 0 ? "Community support" : "Global fandom support",
       video: v.src,
       image: v.image, // if you ever add thumbnails in videos.js
-      cheer:
-        "Add your voice. One word can lift a million hearts."
+      cheer: "Add your voice. One word can lift a million hearts.",
     }));
   }, []);
 
@@ -57,7 +70,7 @@ export default function MentorList() {
         {/* HERO */}
         <header className="mb-6">
           <div className="flex items-center justify-between">
-            <h1 className="text-2xl font-bold">Mentor List</h1>
+            <h1 className="text-2xl font-bold">{TITLE}</h1>
             <button
               onClick={handleOpenVideos}
               className="px-3 py-1.5 rounded-xl bg-pink-500 hover:bg-pink-600 text-white font-medium shadow-sm"
@@ -69,20 +82,11 @@ export default function MentorList() {
           {/* search + quick categories (UI only) */}
           <div className="mt-4">
             <input
-              placeholder="Search mentors, causes, or events"
+              placeholder={SEARCH_PH}
               className="w-full p-3 rounded-xl border border-border bg-background"
             />
             <div className="mt-3 flex flex-wrap gap-2 text-xs">
-              {[
-                "Fandom",
-                "Health",
-                "Education",
-                "Local",
-                "Sports",
-                "Non-profit",
-                "Children",
-                "Emerging Creators",
-              ].map((t) => (
+              {CATEGORIES.map((t) => (
                 <span
                   key={t}
                   className="px-3 py-1 rounded-full border border-border hover:bg-muted cursor-pointer"

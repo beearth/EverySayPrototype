@@ -1,8 +1,7 @@
+// src/lib/mentors.js (예시)
 export const mentors = [
-  { id: 1, name: "박현준 멘토", role: "AI 기획자",
-    company: "하이퍼하이브랩스 프로젝트 디자이너", tag: "상담하기", color: "bg-blue-600" },
-  { id: 2, name: "박현준 멘토", role: "AI 기획자",
-    company: "하이퍼하이브랩스 프로젝트 디자이너", tag: "디자인",   color: "bg-green-600" },
-  { id: 3, name: "박현준 멘토", role: "AI 기획자",
-    company: "하이퍼하이브랩스 프로젝트 디자이너", tag: "AI 기획",  color: "bg-rose-600" },
+  { id: 'm01', name: 'EVERYSAY Demo 1',  category: 'Demo', videoId: 'v01' },
+  { id: 'm02', name: 'EVERYSAY Demo 2',  category: 'Demo', videoId: 'v02' },
+  { id: 'm03', name: 'EVERYSAY Demo 3',  category: 'Demo', videoId: 'v03' },
+  // ... 필요한 만큼 이어서
 ];

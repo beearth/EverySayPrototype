@@ -7,10 +7,17 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+# Dependency directories
 node_modules
+
+# Build output
 dist
 dist-ssr
 *.local
+
+# Ignore public videos and large media files
+public/videos/
+*.mp4
 
 # Editor directories and files
 .vscode/*

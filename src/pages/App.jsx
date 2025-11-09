@@ -1,7 +1,7 @@
-// src/App.jsx
+// src/pages/App.jsx
 import { useState } from "react";
-import MentorList from "./pages/MentorList";
-import ConsentModal from "./components/ConsentModal";
+import MentorList from "./MentorList";
+import ConsentModal from "../components/ConsentModal";
 
 export default function App() {
   const [agreed, setAgreed] = useState(false);
@@ -14,13 +14,11 @@ export default function App() {
         <MentorList />
       </div>
 
-      {/* 하단 고지문 (항상 표시) */}
-<footer className="mt-10 border-t border-border px-4 py-6 text-center text-xs text-neutral-500">
-  ⚠️ This is a prototype of the EVERYSAY Support Platform. 
-  All recorded voices are temporary and deleted within 30 days. 
-  No data is shared or used commercially.
-</footer>
-
+      <footer className="mt-10 border-t border-border px-4 py-6 text-center text-xs text-neutral-500">
+        ⚠️ This is a prototype of the EVERYSAY Support Platform.
+        All recorded voices are temporary and deleted within 30 days.
+        No data is shared or used commercially.
+      </footer>
     </div>
   );
 }

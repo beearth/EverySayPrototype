@@ -7,7 +7,7 @@ import MyStackFeed from "../components/MyStackFeed";
 
 /* ───── 텍스트 한방 교체용 상수 ───── */
 const TITLE = "EVERYSAY Cheer Hub"; // ← 여기서 바꾸면 헤더 제목 변경
-const SEARCH_PH = "Search mentors, causes, or events"; // 검색창 placeholder
+const SEARCH_PH = "Search events"; 
 const CATEGORIES = [
   "Fandom",
   "Health",

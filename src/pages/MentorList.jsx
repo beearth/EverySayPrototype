@@ -25,6 +25,33 @@ const CATEGORIES = [
   "Emerging Creators",
 ];
 
+const DEMO_MIN_WORLDSTACK = 100;
+const DEMO_BASELINE_OFFSET = 97; // adds +97 when actual < 100 so 3 actual -> 100, 4 -> 101
+
+function withDemoFill(items, fillerCount) {
+  if (!Array.isArray(items) || fillerCount <= 0) return Array.isArray(items) ? items : [];
+  const filled = [...items];
+  const baseTime = filled.length
+    ? new Date(filled[filled.length - 1]?.createdAt || Date.now()).getTime()
+    : Date.now();
+
+  for (let i = 0; i < fillerCount; i += 1) {
+    const createdAt = new Date(baseTime - (i + 1) * 1000).toISOString();
+    filled.push({
+      id: `demo-filler-${createdAt}-${i}`,
+      title: "EVERYSAY Demo Recording",
+      createdAt,
+      preset: "demo",
+      duration: 5,
+      isDemo: true,
+    });
+  }
+
+  return filled.sort(
+    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+  );
+}
+
 /* ─────────────────────────────────────────
    Filter out non-existing files (404) for the video modal
    ───────────────────────────────────────── */
@@ -144,24 +171,78 @@ export default function MentorList() {
         const finalSorted = unique.sort(
           (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
         );
-        setStackItems(finalSorted);
 
-        if (!countError && typeof totalCloudCount === "number") {
-          setTotalCount(totalCloudCount);
-        } else {
-          const fallbackTotal = Math.max(localCount, cloudData.length);
-          setTotalCount(fallbackTotal);
+        let actualTotal =
+          !countError && typeof totalCloudCount === "number"
+            ? totalCloudCount
+            : Math.max(localCount, cloudData.length, finalSorted.length);
+
+        if (!Number.isFinite(actualTotal) || actualTotal < finalSorted.length) {
+          actualTotal = finalSorted.length;
         }
+
+        let targetCount;
+        let fillerCount = 0;
+
+        if (actualTotal >= DEMO_MIN_WORLDSTACK) {
+          targetCount = actualTotal;
+        } else {
+          targetCount = Math.max(
+            DEMO_MIN_WORLDSTACK,
+            actualTotal + DEMO_BASELINE_OFFSET
+          );
+          fillerCount = targetCount - finalSorted.length;
+        }
+
+        const demoFilled =
+          fillerCount > 0 ? withDemoFill(finalSorted, fillerCount) : finalSorted;
+
+        setStackItems(demoFilled);
+        setTotalCount(targetCount);
         return;
       }
 
       // If Supabase returned an error or empty data, fall back
-      setStackItems(sortedLocal);
-      setTotalCount(localCount);
+      const actualFallback = Math.max(sortedLocal.length, localCount);
+      let targetFallback;
+      let fillerFallback = 0;
+
+      if (actualFallback >= DEMO_MIN_WORLDSTACK) {
+        targetFallback = actualFallback;
+      } else {
+        targetFallback = Math.max(
+          DEMO_MIN_WORLDSTACK,
+          actualFallback + DEMO_BASELINE_OFFSET
+        );
+        fillerFallback = targetFallback - sortedLocal.length;
+      }
+
+      const demoFilledFallback =
+        fillerFallback > 0 ? withDemoFill(sortedLocal, fillerFallback) : sortedLocal;
+
+      setStackItems(demoFilledFallback);
+      setTotalCount(targetFallback);
     } catch (error) {
       console.error("[Load] Cloud fetch error:", error);
-      setStackItems(sortedLocal);
-      setTotalCount(localCount);
+      const actualFallback = Math.max(sortedLocal.length, localCount);
+      let targetFallback;
+      let fillerFallback = 0;
+
+      if (actualFallback >= DEMO_MIN_WORLDSTACK) {
+        targetFallback = actualFallback;
+      } else {
+        targetFallback = Math.max(
+          DEMO_MIN_WORLDSTACK,
+          actualFallback + DEMO_BASELINE_OFFSET
+        );
+        fillerFallback = targetFallback - sortedLocal.length;
+      }
+
+      const demoFilledFallback =
+        fillerFallback > 0 ? withDemoFill(sortedLocal, fillerFallback) : sortedLocal;
+
+      setStackItems(demoFilledFallback);
+      setTotalCount(targetFallback);
     }
   };
 

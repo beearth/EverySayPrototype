@@ -56,6 +56,7 @@ export default function MentorList() {
   /* Total voice count */
   const [totalCount, setTotalCount] = useState(0);
   const [stackItems, setStackItems] = useState([]);
+  const [myPoints, setMyPoints] = useState(0);
 
   /* Who to Cheer – use first 12 videos directly */
   const cheerCards = useMemo(() => {
@@ -102,6 +103,8 @@ export default function MentorList() {
     const sortedLocal = [...localItems].sort(
       (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
     );
+    const localContrib = Math.max(localCount, sortedLocal.length);
+    setMyPoints(localContrib);
 
     try {
       // Fetch from Supabase for realtime data
@@ -334,15 +337,26 @@ export default function MentorList() {
               </div>
 
               {/* Right: Count Display */}
-              <div className="flex-1 text-center">
-                <div className="text-2xl text-neutral-400 mb-2 font-medium">
-                  WorldStack
+              <div className="flex-1 text-center space-y-4">
+                <div>
+                  <div className="text-2xl text-neutral-400 mb-2 font-medium">
+                    WorldStack
+                  </div>
+                  <div className="text-6xl font-bold text-pink-500 mb-1">
+                    {totalCount.toLocaleString()}
+                  </div>
+                  <div className="text-xs text-neutral-500">
+                    Voices building together
+                  </div>
                 </div>
-                <div className="text-6xl font-bold text-pink-500 mb-1">
-                  {totalCount.toLocaleString()}
-                </div>
-                <div className="text-xs text-neutral-500">
-                  Voices building together
+
+                <div className="inline-flex items-center gap-3 rounded-xl border border-pink-500/30 bg-pink-500/10 px-4 py-2 backdrop-blur-sm">
+                  <div className="text-sm text-neutral-300">
+                    My Stack Points
+                  </div>
+                  <div className="text-2xl font-semibold text-pink-300">
+                    {myPoints.toLocaleString()}
+                  </div>
                 </div>
               </div>
             </div>

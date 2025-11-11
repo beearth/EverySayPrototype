@@ -111,8 +111,7 @@ export default function MentorList() {
       const { data: cloudData, error } = await supa
         .from("recordings")
         .select("*")
-        .order("created_at", { ascending: false })
-        .limit(35);
+        .order("created_at", { ascending: false });
 
       // Get total count from Supabase (all recordings, not just 35)
       const { count: totalCloudCount, error: countError } = await supa
@@ -146,7 +145,7 @@ export default function MentorList() {
         const finalSorted = unique.sort(
           (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
         );
-        setStackItems(finalSorted.slice(0, 35));
+        setStackItems(finalSorted);
 
         if (!countError && typeof totalCloudCount === "number") {
           setTotalCount(totalCloudCount);
@@ -157,11 +156,11 @@ export default function MentorList() {
       }
 
       // If Supabase returned an error or empty data, fall back
-      setStackItems(sortedLocal.slice(0, 35));
+      setStackItems(sortedLocal);
       setTotalCount(localCount);
     } catch (error) {
       console.error("[Load] Cloud fetch error:", error);
-      setStackItems(sortedLocal.slice(0, 35));
+      setStackItems(sortedLocal);
       setTotalCount(localCount);
     }
   };
@@ -326,12 +325,6 @@ export default function MentorList() {
                         );
                       })}
                     </div>
-
-                    {totalCount > 35 && (
-                      <div className="absolute top-0 right-0 text-xl font-bold text-pink-400 bg-pink-500/20 px-4 py-2 rounded-lg backdrop-blur-sm border border-pink-500/30">
-                        +{totalCount - 35}
-                      </div>
-                    )}
                   </>
                 )}
               </div>

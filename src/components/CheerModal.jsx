@@ -11,7 +11,14 @@ const PRESET_SCRIPTS = {
 };
 const MAX_DURATION_SEC = 10;
 
-export default function CheerModal({ open, onClose, item, onSend, onStack }) {
+export default function CheerModal({
+  open,
+  onClose,
+  item,
+  onSend,
+  onStack,
+  session,
+}) {
   const [err, setErr] = useState("");
   const [recording, setRecording] = useState(false);
   const [blobUrl, setBlobUrl] = useState("");
@@ -193,6 +200,7 @@ export default function CheerModal({ open, onClose, item, onSend, onStack }) {
           preset: selectedPreset || null,
           duration: duration,
           created_at: new Date().toISOString(),
+          user_id: session?.user?.id ?? null,
         });
       
       if (dbError) {
@@ -200,11 +208,33 @@ export default function CheerModal({ open, onClose, item, onSend, onStack }) {
         // Continue anyway - local storage still works
       }
 
-      // keep existing onStack, but include cloud info:
-      await onStack?.(new File([blob], key.split("/").pop(), { type: blob.type }), {
-        preset: selectedPreset, script, duration, timestamp: Date.now(),
-        type: "local-recording", cloudPath: data.path, cloudUrl: pub
+      const {
+        data: { user },
+      } = await supa.auth.getUser();
+
+      await supa.from("recordings_meta").insert({
+        file_path: data.path,
+        mime_type: blob.type || "audio/webm",
+        size_bytes: blob.size ?? 0,
+        preset: selectedPreset || null,
+        duration_ms: (duration ?? 0) * 1000,
+        user_id: user?.id || null,
       });
+
+      // keep existing onStack, but include cloud info:
+      await onStack?.(
+        new File([blob], key.split("/").pop(), { type: blob.type }),
+        {
+          preset: selectedPreset,
+          script,
+          duration,
+          timestamp: Date.now(),
+          type: "local-recording",
+          cloudPath: data.path,
+          cloudUrl: pub,
+          userId: session?.user?.id ?? null,
+        }
+      );
 
       // 성공 메시지 표시
       setErr("Recording saved to My Stack!");

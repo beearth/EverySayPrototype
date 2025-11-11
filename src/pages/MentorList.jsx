@@ -9,6 +9,7 @@ import MyStackFeed, {
   getAllStackItems,
 } from "../components/MyStackFeed";
 import { supa } from "../lib/supa";
+import MyStackPoints from "../components/MyStackPoints";
 
 /* ───── 텍스트 한방 교체용 상수 ───── */
 const TITLE = "EVERYSAY Cheer Hub"; // ← 여기서 바꾸면 헤더 제목 변경
@@ -56,7 +57,7 @@ export default function MentorList() {
   /* Total voice count */
   const [totalCount, setTotalCount] = useState(0);
   const [stackItems, setStackItems] = useState([]);
-  const [myPoints, setMyPoints] = useState(0);
+  const [session, setSession] = useState(null);
 
   /* Who to Cheer – use first 12 videos directly */
   const cheerCards = useMemo(() => {
@@ -103,8 +104,6 @@ export default function MentorList() {
     const sortedLocal = [...localItems].sort(
       (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
     );
-    const localContrib = Math.max(localCount, sortedLocal.length);
-    setMyPoints(localContrib);
 
     try {
       // Fetch from Supabase for realtime data
@@ -150,7 +149,8 @@ export default function MentorList() {
         if (!countError && typeof totalCloudCount === "number") {
           setTotalCount(totalCloudCount);
         } else {
-          setTotalCount(Math.max(localCount, cloudData.length));
+          const fallbackTotal = Math.max(localCount, cloudData.length);
+          setTotalCount(fallbackTotal);
         }
         return;
       }
@@ -167,7 +167,7 @@ export default function MentorList() {
 
   useEffect(() => {
     loadData();
-  }, [stackRefresh]);
+  }, [stackRefresh, session]);
 
   // Initial load
   useEffect(() => {
@@ -193,6 +193,18 @@ export default function MentorList() {
 
     return () => {
       supa.removeChannel(channel);
+    };
+  }, []);
+
+  useEffect(() => {
+    supa.auth.getSession().then(({ data }) => setSession(data.session ?? null));
+    const {
+      data: authListener,
+    } = supa.auth.onAuthStateChange((_event, newSession) => {
+      setSession(newSession);
+    });
+    return () => {
+      authListener.subscription.unsubscribe();
     };
   }, []);
 
@@ -343,14 +355,10 @@ export default function MentorList() {
                   </div>
                 </div>
 
-                <div className="inline-flex items-center gap-3 rounded-xl border border-pink-500/30 bg-pink-500/10 px-4 py-2 backdrop-blur-sm">
-                  <div className="text-sm text-neutral-300">
-                    My Stack Points
-                  </div>
-                  <div className="text-2xl font-semibold text-pink-300">
-                    {myPoints.toLocaleString()}
-                  </div>
-                </div>
+                <MyStackPoints
+                  session={session}
+                  refreshKey={stackRefresh}
+                />
               </div>
             </div>
           </div>
@@ -470,6 +478,7 @@ export default function MentorList() {
         open={cheerOpen}
         onClose={() => setCheerOpen(false)}
         item={cheerItem}
+        session={session}
         onStack={async (file, metadata) => {
           try {
             await addToStack(file, metadata);

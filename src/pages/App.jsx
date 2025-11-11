@@ -2,6 +2,7 @@
 import { useState } from "react";
 import MentorList from "./MentorList";
 import ConsentModal from "../components/ConsentModal";
+import AuthButtons from "../components/AuthButtons";
 
 export default function App() {
   const [agreed, setAgreed] = useState(false);
@@ -11,6 +12,9 @@ export default function App() {
   return (
     <div className="min-h-screen bg-background text-foreground">
       <div className="mx-auto max-w-6xl p-6">
+        <div className="mb-4 flex justify-end">
+          <AuthButtons />
+        </div>
         <MentorList />
       </div>
 

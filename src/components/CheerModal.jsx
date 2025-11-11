@@ -77,10 +77,10 @@ export default function CheerModal({ open, onClose, item, onSend, onStack }) {
   function startCountdown() {
     if (counting || recording || !selectedPreset) return;
     
-    setCountdown(3);
+    setCountdown(2);
     setCounting(true);
     
-    let count = 3;
+    let count = 2;
     countdownRef.current = setInterval(() => {
       count -= 1;
       if (count <= 0) {
@@ -91,7 +91,7 @@ export default function CheerModal({ open, onClose, item, onSend, onStack }) {
       } else {
         setCountdown(count);
       }
-    }, 1000);
+    }, 500);
   }
 
   async function startRecording() {
@@ -165,6 +165,23 @@ export default function CheerModal({ open, onClose, item, onSend, onStack }) {
       console.log("[Upload] Success! Path:", data.path);
 
       const pub = supa.storage.from("recordings").getPublicUrl(data.path).data.publicUrl;
+
+      // Save metadata to Supabase table for realtime sync
+      const { error: dbError } = await supa
+        .from("recordings")
+        .insert({
+          storage_path: data.path,
+          public_url: pub,
+          script: script,
+          preset: selectedPreset || null,
+          duration: duration,
+          created_at: new Date().toISOString(),
+        });
+      
+      if (dbError) {
+        console.error("[DB] Failed to save metadata:", dbError);
+        // Continue anyway - local storage still works
+      }
 
       // keep existing onStack, but include cloud info:
       await onStack?.(new File([blob], key.split("/").pop(), { type: blob.type }), {

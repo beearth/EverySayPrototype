@@ -97,7 +97,7 @@ async function remove(id) {
   });
 }
 
-export { add as addToStack, getTotalCount, incrementTotalCount };
+export { add as addToStack, getTotalCount, incrementTotalCount, getAll as getAllStackItems };
 
 function fmt(iso) {
   const d = new Date(iso);

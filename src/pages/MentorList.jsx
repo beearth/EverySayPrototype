@@ -175,10 +175,10 @@ export default function MentorList() {
         let actualTotal =
           !countError && typeof totalCloudCount === "number"
             ? totalCloudCount
-            : Math.max(localCount, cloudData.length, finalSorted.length);
+            : cloudItems.length;
 
-        if (!Number.isFinite(actualTotal) || actualTotal < finalSorted.length) {
-          actualTotal = finalSorted.length;
+        if (!Number.isFinite(actualTotal) || actualTotal < 0) {
+          actualTotal = cloudItems.length;
         }
 
         let targetCount;
@@ -203,7 +203,7 @@ export default function MentorList() {
       }
 
       // If Supabase returned an error or empty data, fall back
-      const actualFallback = Math.max(sortedLocal.length, localCount);
+        const actualFallback = 0;
       let targetFallback;
       let fillerFallback = 0;
 
@@ -224,7 +224,7 @@ export default function MentorList() {
       setTotalCount(targetFallback);
     } catch (error) {
       console.error("[Load] Cloud fetch error:", error);
-      const actualFallback = Math.max(sortedLocal.length, localCount);
+      const actualFallback = 0;
       let targetFallback;
       let fillerFallback = 0;
 

@@ -78,13 +78,32 @@ export default function MentorList() {
 
   // Load data function
   const loadData = async () => {
-    try {
-      // Load local data
-      const localItems = await getAllStackItems();
-      const sorted = localItems.sort(
-        (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
-      );
+    let localItems = [];
+    let localCount = 0;
 
+    try {
+      const items = await getAllStackItems();
+      if (Array.isArray(items)) {
+        localItems = items;
+      }
+    } catch (err) {
+      console.warn("[Load] Local stack unavailable:", err);
+    }
+
+    try {
+      const count = await getTotalCount();
+      if (typeof count === "number" && !Number.isNaN(count)) {
+        localCount = count;
+      }
+    } catch (err) {
+      console.warn("[Load] Local count unavailable:", err);
+    }
+
+    const sortedLocal = [...localItems].sort(
+      (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+    );
+
+    try {
       // Fetch from Supabase for realtime data
       const { data: cloudData, error } = await supa
         .from("recordings")
@@ -110,7 +129,7 @@ export default function MentorList() {
         }));
 
         // Combine and deduplicate (prefer cloud data)
-        const combined = [...cloudItems, ...sorted];
+        const combined = [...cloudItems, ...sortedLocal];
         const unique = combined.filter(
           (item, index, self) =>
             index ===
@@ -126,30 +145,21 @@ export default function MentorList() {
         );
         setStackItems(finalSorted.slice(0, 35));
 
-        // Use Supabase count as source of truth
-        if (!countError && totalCloudCount !== null) {
+        if (!countError && typeof totalCloudCount === "number") {
           setTotalCount(totalCloudCount);
         } else {
-          // Fallback to local count if Supabase fails
-          const localCount = await getTotalCount();
           setTotalCount(Math.max(localCount, cloudData.length));
         }
-      } else {
-        setStackItems(sorted.slice(0, 35));
-        // Fallback to local count
-        const localCount = await getTotalCount();
-        setTotalCount(localCount);
+        return;
       }
-    } catch (error) {
-      console.error("[Load] Error:", error);
-      // Fallback to local data on error
-      const localCount = await getTotalCount();
+
+      // If Supabase returned an error or empty data, fall back
+      setStackItems(sortedLocal.slice(0, 35));
       setTotalCount(localCount);
-      const localItems = await getAllStackItems();
-      const sorted = localItems.sort(
-        (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
-      );
-      setStackItems(sorted.slice(0, 35));
+    } catch (error) {
+      console.error("[Load] Cloud fetch error:", error);
+      setStackItems(sortedLocal.slice(0, 35));
+      setTotalCount(localCount);
     }
   };
 

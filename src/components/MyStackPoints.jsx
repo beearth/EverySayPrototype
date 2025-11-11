@@ -13,7 +13,7 @@ export default function MyStackPoints({ session, refreshKey = 0 }) {
       }
       const { count, error } = await supa
         .from("recordings_meta")
-        .select("*", { count: "exact", head: true })
+        .select("id", { count: "exact" })
         .eq("user_id", targetUserId);
       if (!error) {
         setPoints(count ?? 0);

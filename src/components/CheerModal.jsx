@@ -5,7 +5,9 @@ const GUIDE_TEXT = "When the light turns on, speak your cheer slowly.";
 const PRESET_SCRIPTS = {
   yc: "i love ycombinator",
   bts: "i love bts",
-  lord: "i loveyou lord aman"
+  lord: "i loveyou lord aman",
+  cando: "i can do it",
+  earth: "i love earth"
 };
 const MAX_DURATION_SEC = 10;
 
@@ -307,6 +309,26 @@ export default function CheerModal({ open, onClose, item, onSend, onStack }) {
                 }`}
               >
                 3. I love you Lord, Amen
+              </button>
+              <button
+                onClick={() => setSelectedPreset("cando")}
+                className={`rounded-xl px-4 py-2 ${
+                  selectedPreset === "cando"
+                    ? "bg-pink-500 text-white"
+                    : "border border-white/20 text-neutral-200 hover:bg-white/10"
+                }`}
+              >
+                4. I can do it
+              </button>
+              <button
+                onClick={() => setSelectedPreset("earth")}
+                className={`rounded-xl px-4 py-2 ${
+                  selectedPreset === "earth"
+                    ? "bg-pink-500 text-white"
+                    : "border border-white/20 text-neutral-200 hover:bg-white/10"
+                }`}
+              >
+                5. I love Earth
               </button>
             </div>
           </div>

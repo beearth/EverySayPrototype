@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { supa } from "../lib/supa";
+import { supaMain } from "../lib/supa";
 
 const GUIDE_TEXT = "When the light turns on, speak your cheer slowly.";
 const PRESET_SCRIPTS = {
@@ -177,7 +177,7 @@ export default function CheerModal({
       const key = makeRecordingKey({ uid: "demo", room: "demo1" });
       console.log("[Upload] Starting upload to:", key, "Size:", blob.size, "Type:", blob.type);
       
-      const { data, error } = await supa.storage
+      const { data, error } = await supaMain.storage
         .from("recordings")
         .upload(key, blob, { contentType: blob.type || "audio/webm", upsert: false });
       
@@ -188,10 +188,20 @@ export default function CheerModal({
       
       console.log("[Upload] Success! Path:", data.path);
 
-      const pub = supa.storage.from("recordings").getPublicUrl(data.path).data.publicUrl;
+      const pub = supaMain.storage.from("recordings").getPublicUrl(data.path).data.publicUrl;
 
       // Save metadata to Supabase table for realtime sync
-      const { error: dbError } = await supa
+      const {
+        data: { user },
+        error: userError,
+      } = await supaMain.auth.getUser();
+      if (userError) {
+        console.error("[Auth] Failed to fetch user:", userError);
+      }
+
+      const currentUserId = user?.id ?? session?.user?.id ?? null;
+
+      const { error: dbError } = await supaMain
         .from("recordings")
         .insert({
           storage_path: data.path,
@@ -200,7 +210,7 @@ export default function CheerModal({
           preset: selectedPreset || null,
           duration: duration,
           created_at: new Date().toISOString(),
-          user_id: session?.user?.id ?? null,
+          user_id: currentUserId,
         });
       
       if (dbError) {
@@ -208,17 +218,13 @@ export default function CheerModal({
         // Continue anyway - local storage still works
       }
 
-      const {
-        data: { user },
-      } = await supa.auth.getUser();
-
-      await supa.from("recordings_meta").insert({
+      await supaMain.from("recordings_meta").insert({
         file_path: data.path,
         mime_type: blob.type || "audio/webm",
         size_bytes: blob.size ?? 0,
         preset: selectedPreset || null,
         duration_ms: (duration ?? 0) * 1000,
-        user_id: user?.id || null,
+        user_id: currentUserId,
       });
 
       // keep existing onStack, but include cloud info:
@@ -232,7 +238,7 @@ export default function CheerModal({
           type: "local-recording",
           cloudPath: data.path,
           cloudUrl: pub,
-          userId: session?.user?.id ?? null,
+          userId: currentUserId,
         }
       );
 

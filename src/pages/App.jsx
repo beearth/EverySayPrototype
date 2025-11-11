@@ -1,11 +1,32 @@
 // src/pages/App.jsx
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import MentorList from "./MentorList";
 import ConsentModal from "../components/ConsentModal";
 import AuthButtons from "../components/AuthButtons";
+import { supaMain as supa } from "../lib/supa";
 
 export default function App() {
   const [agreed, setAgreed] = useState(false);
+
+  useEffect(() => {
+    const href = window.location.href;
+    const hasCode = href.includes("code=") && href.includes("state=");
+    if (!hasCode) return;
+
+    supa.auth
+      .exchangeCodeForSession(href)
+      .then(() => {
+        const url = new URL(href);
+        window.history.replaceState(
+          {},
+          document.title,
+          url.origin + url.pathname + url.hash
+        );
+      })
+      .catch((e) => {
+        console.error("[exchangeCodeForSession]", e);
+      });
+  }, []);
 
   if (!agreed) return <ConsentModal onAgree={() => setAgreed(true)} />;
 

@@ -80,20 +80,22 @@ export default function MentorList() {
   const loadData = async () => {
     try {
       // Load local data
-      const localCount = await getTotalCount();
-      setTotalCount(localCount);
-
       const localItems = await getAllStackItems();
       const sorted = localItems.sort(
         (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
       );
 
-      // Also fetch from Supabase for realtime data
+      // Fetch from Supabase for realtime data
       const { data: cloudData, error } = await supa
         .from("recordings")
         .select("*")
         .order("created_at", { ascending: false })
         .limit(35);
+
+      // Get total count from Supabase (all recordings, not just 35)
+      const { count: totalCloudCount, error: countError } = await supa
+        .from("recordings")
+        .select("*", { count: "exact", head: true });
 
       if (!error && cloudData) {
         // Merge cloud data with local data
@@ -123,12 +125,31 @@ export default function MentorList() {
           (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
         );
         setStackItems(finalSorted.slice(0, 35));
-        setTotalCount(Math.max(localCount, cloudData.length));
+
+        // Use Supabase count as source of truth
+        if (!countError && totalCloudCount !== null) {
+          setTotalCount(totalCloudCount);
+        } else {
+          // Fallback to local count if Supabase fails
+          const localCount = await getTotalCount();
+          setTotalCount(Math.max(localCount, cloudData.length));
+        }
       } else {
         setStackItems(sorted.slice(0, 35));
+        // Fallback to local count
+        const localCount = await getTotalCount();
+        setTotalCount(localCount);
       }
     } catch (error) {
       console.error("[Load] Error:", error);
+      // Fallback to local data on error
+      const localCount = await getTotalCount();
+      setTotalCount(localCount);
+      const localItems = await getAllStackItems();
+      const sorted = localItems.sort(
+        (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+      );
+      setStackItems(sorted.slice(0, 35));
     }
   };
 

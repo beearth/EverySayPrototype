@@ -24,3 +24,46 @@
   *{ @apply border-border; }
   body{ @apply bg-background text-foreground; }
 }
+
+/* WorldStack Tower Animation */
+@keyframes stackUp {
+  0% {
+    transform: translateY(100px) translateZ(0) rotateX(90deg);
+    opacity: 0;
+  }
+  50% {
+    transform: translateY(-5px) translateZ(0) rotateX(0deg);
+  }
+  100% {
+    transform: translateY(0) translateZ(0) rotateX(0deg);
+    opacity: 1;
+  }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0) translateZ(0);
+  }
+  50% {
+    transform: translateY(-3px) translateZ(0);
+  }
+}
+
+/* 3D Tower Block */
+.tower-block {
+  transform-style: preserve-3d;
+  perspective: 1000px;
+}
+
+.tower-block::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 100%;
+  background: inherit;
+  transform: rotateX(-90deg);
+  transform-origin: top;
+  opacity: 0.3;
+}

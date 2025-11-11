@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { supa } from "../lib/supa";
 
 const GUIDE_TEXT = "When the light turns on, speak your cheer slowly.";
 const PRESET_SCRIPTS = {
@@ -28,6 +29,20 @@ export default function CheerModal({ open, onClose, item, onSend, onStack }) {
   const script = (selectedPreset ? PRESET_SCRIPTS[selectedPreset] : item?.cheerScript || "").trim();
   const words = useMemo(() => script.split(/\s+/).filter(Boolean), [script]);
   const SPEED_MS = 420;
+
+  function makeRecordingKey({ uid = "demo", room = "demo1", d = new Date() }) {
+    const yyyy = d.getFullYear();
+    const mm   = String(d.getMonth() + 1).padStart(2, "0");
+    const dd   = String(d.getDate()).padStart(2, "0");
+    const HH   = String(d.getHours()).padStart(2, "0");
+    const MI   = String(d.getMinutes()).padStart(2, "0");
+    const SS   = String(d.getSeconds()).padStart(2, "0");
+    const MS   = String(d.getMilliseconds()).padStart(3, "0");
+    const rand = (crypto.randomUUID?.() || Math.random().toString(36).slice(2, 8));
+    const dateFolder = `${yyyy}-${mm}-${dd}`;
+    const filename   = `${yyyy}${mm}${dd}_${HH}${MI}${SS}${MS}_${uid}_${room}_${rand}.webm`;
+    return `users/${uid}/${room}/${dateFolder}/${filename}`;
+  }
 
   useEffect(() => {
     if (!open) return;
@@ -130,20 +145,32 @@ export default function CheerModal({ open, onClose, item, onSend, onStack }) {
   async function handleSendAndStack() {
     if (!blobUrl) return;
     try {
-      const response = await fetch(blobUrl);
-      const blob = await response.blob();
-      const filename = `everysay-${Date.now()}.webm`;
-      const file = new File([blob], filename, { type: blob.type });
-      const metadata = {
-        preset: selectedPreset,
-        script: script,
-        duration: duration,
-        timestamp: Date.now(),
-        type: 'local-recording'
-      };
+      const res = await fetch(blobUrl);
+      let blob = await res.blob();
+      if (!blob || !blob.size) throw new Error("빈 오디오(0바이트)입니다.");
+      if (!blob.type) blob = new Blob([blob], { type: "audio/webm" });
 
-      // 로컬 스택에 저장
-      await onStack?.(file, metadata);
+      const key = makeRecordingKey({ uid: "demo", room: "demo1" });
+      console.log("[Upload] Starting upload to:", key, "Size:", blob.size, "Type:", blob.type);
+      
+      const { data, error } = await supa.storage
+        .from("recordings")
+        .upload(key, blob, { contentType: blob.type || "audio/webm", upsert: false });
+      
+      if (error) {
+        console.error("[Upload] Supabase error:", error);
+        throw error;
+      }
+      
+      console.log("[Upload] Success! Path:", data.path);
+
+      const pub = supa.storage.from("recordings").getPublicUrl(data.path).data.publicUrl;
+
+      // keep existing onStack, but include cloud info:
+      await onStack?.(new File([blob], key.split("/").pop(), { type: blob.type }), {
+        preset: selectedPreset, script, duration, timestamp: Date.now(),
+        type: "local-recording", cloudPath: data.path, cloudUrl: pub
+      });
 
       // 성공 메시지 표시
       setErr("녹음이 My Stack에 저장되었습니다!");
@@ -156,7 +183,8 @@ export default function CheerModal({ open, onClose, item, onSend, onStack }) {
 
     } catch (e) {
       console.error(e);
-      setErr("My Stack 저장 중 오류가 발생했습니다.");
+      const msg = e?.message || e?.error?.message || JSON.stringify(e);
+      setErr(`업로드/저장 오류: ${msg}`);
     }
   }
 

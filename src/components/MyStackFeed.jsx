@@ -3,15 +3,19 @@ import { useEffect, useState } from "react";
 
 const DB_NAME = "everysay";
 const STORE = "stack";
+const STATS_STORE = "stats";
 
 // IndexedDB helper
 async function openDB() {
   return await new Promise((resolve, reject) => {
-    const req = indexedDB.open(DB_NAME, 1);
+    const req = indexedDB.open(DB_NAME, 2);
     req.onupgradeneeded = () => {
       const db = req.result;
       if (!db.objectStoreNames.contains(STORE)) {
         db.createObjectStore(STORE, { keyPath: "id", autoIncrement: true });
+      }
+      if (!db.objectStoreNames.contains(STATS_STORE)) {
+        db.createObjectStore(STATS_STORE, { keyPath: "key" });
       }
     };
     req.onsuccess = () => resolve(req.result);
@@ -27,6 +31,63 @@ async function getAll() {
     req.onerror = () => reject(req.error);
   });
 }
+async function incrementTotalCount() {
+  const db = await openDB();
+  return await new Promise((resolve, reject) => {
+    const tx = db.transaction(STATS_STORE, "readwrite");
+    const store = tx.objectStore(STATS_STORE);
+    const req = store.get("totalCount");
+    req.onsuccess = () => {
+      const current = req.result?.value || 0;
+      const updateReq = store.put({ key: "totalCount", value: current + 1 });
+      updateReq.onsuccess = () => resolve(current + 1);
+      updateReq.onerror = () => reject(updateReq.error);
+    };
+    req.onerror = () => reject(req.error);
+  });
+}
+
+async function getTotalCount() {
+  const db = await openDB();
+  return await new Promise((resolve, reject) => {
+    const tx = db.transaction(STATS_STORE, "readonly");
+    const req = tx.objectStore(STATS_STORE).get("totalCount");
+    req.onsuccess = () => resolve(req.result?.value || 0);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+async function add(file, metadata) {
+  const db = await openDB();
+  return await new Promise((resolve, reject) => {
+    const tx = db.transaction([STORE, STATS_STORE], "readwrite");
+    const blob = new Blob([file], { type: file.type });
+    const item = {
+      blob,
+      createdAt: new Date().toISOString(),
+      duration: metadata.duration || 0,
+      tag: metadata.preset || "custom",
+      title: metadata.script || "Recording",
+      itemId: metadata.itemId || "",
+      note: metadata.note || "",
+      cloudPath: metadata.cloudPath || null,
+      cloudUrl: metadata.cloudUrl || null,
+    };
+    const stackReq = tx.objectStore(STORE).add(item);
+    
+    // Increment total count
+    const statsStore = tx.objectStore(STATS_STORE);
+    const countReq = statsStore.get("totalCount");
+    countReq.onsuccess = () => {
+      const current = countReq.result?.value || 0;
+      statsStore.put({ key: "totalCount", value: current + 1 });
+    };
+    
+    stackReq.onsuccess = () => resolve(stackReq.result);
+    stackReq.onerror = () => reject(stackReq.error);
+  });
+}
+
 async function remove(id) {
   const db = await openDB();
   return await new Promise((resolve, reject) => {
@@ -35,6 +96,8 @@ async function remove(id) {
     tx.onerror = () => reject(tx.error);
   });
 }
+
+export { add as addToStack, getTotalCount, incrementTotalCount };
 
 function fmt(iso) {
   const d = new Date(iso);
@@ -45,7 +108,7 @@ function fmt(iso) {
   return `${d.getFullYear()}.${mm}.${dd} ${hh}:${mi}`;
 }
 
-export default function MyStackFeed() {
+export default function MyStackFeed({ refreshTrigger }) {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -63,7 +126,7 @@ export default function MyStackFeed() {
 
   useEffect(() => {
     load();
-  }, []);
+  }, [refreshTrigger]);
 
   return (
     <section className="mt-10">

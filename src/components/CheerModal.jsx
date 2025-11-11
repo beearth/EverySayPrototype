@@ -7,6 +7,7 @@ const PRESET_SCRIPTS = {
   bts: "i love bts",
   lord: "i loveyou lord aman"
 };
+const MAX_DURATION_SEC = 10;
 
 export default function CheerModal({ open, onClose, item, onSend, onStack }) {
   const [err, setErr] = useState("");
@@ -121,8 +122,22 @@ export default function CheerModal({ open, onClose, item, onSend, onStack }) {
 
       tickerRef.current = setInterval(() => {
         const elapsed = performance.now() - startedAtRef.current;
-        setDuration(Math.floor(elapsed / 1000));
+        const elapsedSec = elapsed / 1000;
+
+        setDuration(Math.floor(Math.min(elapsedSec, MAX_DURATION_SEC)));
         setWordIdx((i) => Math.min(words.length - 1, i + 1));
+
+        if (elapsedSec >= MAX_DURATION_SEC) {
+          clearInterval(tickerRef.current);
+          setErr((prev) => prev || "녹음은 최대 10초까지 가능합니다.");
+          if (recorderRef.current?.state === "recording") {
+            try {
+              recorderRef.current.stop();
+            } catch (err) {
+              console.warn("[Recorder] stop failed:", err);
+            }
+          }
+        }
       }, SPEED_MS);
 
       rec.start();

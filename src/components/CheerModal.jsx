@@ -131,7 +131,7 @@ export default function CheerModal({ open, onClose, item, onSend, onStack }) {
 
         if (elapsedSec >= MAX_DURATION_SEC) {
           clearInterval(tickerRef.current);
-          setErr((prev) => prev || "녹음은 최대 10초까지 가능합니다.");
+          setErr((prev) => prev || "Recording is limited to 10 seconds.");
           if (recorderRef.current?.state === "recording") {
             try {
               recorderRef.current.stop();
@@ -145,7 +145,7 @@ export default function CheerModal({ open, onClose, item, onSend, onStack }) {
       rec.start();
     } catch (e) {
       console.error(e);
-      setErr("마이크 권한이 거부되었거나 사용할 수 없습니다.");
+      setErr("Microphone permission was denied or is unavailable.");
       cleanupMedia();
     }
   }
@@ -164,7 +164,7 @@ export default function CheerModal({ open, onClose, item, onSend, onStack }) {
     try {
       const res = await fetch(blobUrl);
       let blob = await res.blob();
-      if (!blob || !blob.size) throw new Error("빈 오디오(0바이트)입니다.");
+      if (!blob || !blob.size) throw new Error("Empty audio (0 bytes).");
       if (!blob.type) blob = new Blob([blob], { type: "audio/webm" });
 
       const key = makeRecordingKey({ uid: "demo", room: "demo1" });
@@ -207,7 +207,7 @@ export default function CheerModal({ open, onClose, item, onSend, onStack }) {
       });
 
       // 성공 메시지 표시
-      setErr("녹음이 My Stack에 저장되었습니다!");
+      setErr("Recording saved to My Stack!");
 
       // 1초 후 모달 닫기
       setTimeout(() => {
@@ -218,7 +218,7 @@ export default function CheerModal({ open, onClose, item, onSend, onStack }) {
     } catch (e) {
       console.error(e);
       const msg = e?.message || e?.error?.message || JSON.stringify(e);
-      setErr(`업로드/저장 오류: ${msg}`);
+      setErr(`Upload/Save error: ${msg}`);
     }
   }
 
@@ -249,13 +249,13 @@ export default function CheerModal({ open, onClose, item, onSend, onStack }) {
             }}
             className="rounded-lg px-3 py-1 text-sm border border-white/20 hover:bg-white/10"
           >
-            닫기
+            Close
           </button>
         </div>
 
         {err && (
           <div className={`mb-3 rounded-lg border px-3 py-2 text-sm ${
-            err.includes("저장되었습니다") 
+            err.includes("saved to My Stack")
               ? "border-green-500/30 bg-green-500/10 text-green-200"
               : "border-red-500/30 bg-red-500/10 text-red-200"
           }`}>
@@ -278,7 +278,7 @@ export default function CheerModal({ open, onClose, item, onSend, onStack }) {
 
           {/* 프리셋 선택 */}
           <div className="space-y-3">
-            <p className="text-sm text-neutral-300">스크립트 선택:</p>
+            <p className="text-sm text-neutral-300">Choose a script:</p>
             <div className="flex flex-wrap gap-2">
               <button
                 onClick={() => setSelectedPreset("yc")}
@@ -338,7 +338,7 @@ export default function CheerModal({ open, onClose, item, onSend, onStack }) {
             <div className="rounded-xl border border-white/10 bg-white/5 p-3 space-y-2">
               <p className="text-sm text-neutral-300">{GUIDE_TEXT}</p>
               <p className="text-[13px] leading-6 text-neutral-200">
-                <b>읽을 문장:</b> {script}
+                <b>Script:</b> {script}
               </p>
             </div>
           )}
@@ -350,7 +350,7 @@ export default function CheerModal({ open, onClose, item, onSend, onStack }) {
                 <div className="flex items-center gap-2 text-sm">
                   <span className="inline-flex h-2 w-2 animate-pulse rounded-full bg-pink-400" />
                   <span className="text-neutral-300">
-                    녹음 중... {duration}초
+                    Recording... {duration}s
                   </span>
                 </div>
                 <Karaoke words={words} currentIndex={wordIdx} />
@@ -359,7 +359,7 @@ export default function CheerModal({ open, onClose, item, onSend, onStack }) {
                     onClick={stopRecording}
                     className="rounded-xl bg-white/10 px-4 py-2 text-white hover:bg-white/20"
                   >
-                    ⏹ 녹음 중지
+                    ⏹ Stop Recording
                   </button>
                   <button
                     onClick={() => {
@@ -368,7 +368,7 @@ export default function CheerModal({ open, onClose, item, onSend, onStack }) {
                     }}
                     className="rounded-xl border border-white/20 px-3 py-2 text-sm hover:bg-white/10"
                   >
-                    취소
+                    Cancel
                   </button>
                 </div>
               </>
@@ -392,7 +392,7 @@ export default function CheerModal({ open, onClose, item, onSend, onStack }) {
                       : "bg-neutral-700 text-neutral-400 cursor-not-allowed"
                   }`}
                 >
-                  {selectedPreset ? "🎙 녹음 시작" : "스크립트를 선택해주세요"}
+                  {selectedPreset ? "🎙 Start Recording" : "Select a script first"}
                 </button>
 
                 {blobUrl && (
@@ -413,7 +413,7 @@ export default function CheerModal({ open, onClose, item, onSend, onStack }) {
                           onClick={saveFile}
                           className="flex-1 rounded-xl border border-white/20 px-3 py-2 text-sm hover:bg-white/10"
                         >
-                          💾 다운로드
+                          💾 Download
                         </button>
                         <button
                           onClick={() => {
@@ -422,7 +422,7 @@ export default function CheerModal({ open, onClose, item, onSend, onStack }) {
                           }}
                           className="flex-1 rounded-xl border border-white/20 px-3 py-2 text-sm hover:bg-white/10"
                         >
-                          🔄 다시 녹음
+                          🔄 Record Again
                         </button>
                       </div>
                     </div>

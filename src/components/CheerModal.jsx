@@ -1,286 +1,382 @@
-// src/components/CheerModal.jsx
-import { useEffect, useRef, useState } from "react";
-import { supa } from "../lib/supa";
+import { useEffect, useMemo, useRef, useState } from "react";
 
-export default function CheerModal({ open, onClose, item }) {
-  if (!open || !item) return null;
+const GUIDE_TEXT = "When the light turns on, speak your cheer slowly.";
+const PRESET_SCRIPTS = {
+  yc: "i love ycombinator",
+  bts: "i love bts",
+  lord: "i loveyou lord aman"
+};
 
-  const safeClose = () => { try { onClose?.(); } catch {} };
-  useEffect(() => {
-    const onKey = (e) => { if (e.key === "Escape") safeClose(); };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, []);
+export default function CheerModal({ open, onClose, item, onSend, onStack }) {
+  const [err, setErr] = useState("");
+  const [recording, setRecording] = useState(false);
+  const [blobUrl, setBlobUrl] = useState("");
+  const [duration, setDuration] = useState(0);
+  const [wordIdx, setWordIdx] = useState(0);
+  const [selectedPreset, setSelectedPreset] = useState("");
+  const [countdown, setCountdown] = useState(0);
+  const [counting, setCounting] = useState(false);
 
-  /* ─ Video preview state ─ */
-  const [videoDur, setVideoDur] = useState(null);
   const videoRef = useRef(null);
+  const mediaStreamRef = useRef(null);
+  const recorderRef = useRef(null);
+  const chunksRef = useRef([]);
+  const startedAtRef = useRef(0);
+  const tickerRef = useRef(null);
+  const countdownRef = useRef(null);
 
-  /* 🔊 Autoplay when modal opens (muted + playsInline + play()) */
+  const script = (selectedPreset ? PRESET_SCRIPTS[selectedPreset] : item?.cheerScript || "").trim();
+  const words = useMemo(() => script.split(/\s+/).filter(Boolean), [script]);
+  const SPEED_MS = 420;
+
   useEffect(() => {
-    const v = videoRef.current;
-    if (!open || !item?.video || !v) return;
+    if (!open) return;
+    resetAll();
+    return () => cleanupMedia();
+  }, [open]);
 
-    v.muted = true;        // required by autoplay policy
-    v.playsInline = true;  // iOS Safari
-    const tryPlay = () => v.play().catch(() => { /* ignore */ });
+  function resetAll() {
+    setErr("");
+    setRecording(false);
+    setBlobUrl("");
+    setDuration(0);
+    setWordIdx(0);
+    setSelectedPreset("");
+    setCountdown(0);
+    setCounting(false);
+    clearInterval(tickerRef.current);
+    clearInterval(countdownRef.current);
+  }
 
-    if (v.readyState >= 2) tryPlay();
-    else v.addEventListener("loadeddata", tryPlay, { once: true });
+  function cleanupMedia() {
+    try {
+      clearInterval(tickerRef.current);
+      clearInterval(countdownRef.current);
+      recorderRef.current?.state !== "inactive" && recorderRef.current?.stop();
+      mediaStreamRef.current?.getTracks()?.forEach((t) => t.stop());
+    } catch {}
+    recorderRef.current = null;
+    mediaStreamRef.current = null;
+  }
 
-    return () => {
-      // pause when modal closes / item changes
-      try { v.pause(); } catch {}
-    };
-  }, [open, item?.video]);
+  function startCountdown() {
+    if (counting || recording || !selectedPreset) return;
+    
+    setCountdown(3);
+    setCounting(true);
+    
+    let count = 3;
+    countdownRef.current = setInterval(() => {
+      count -= 1;
+      if (count <= 0) {
+        clearInterval(countdownRef.current);
+        setCounting(false);
+        setCountdown(0);
+        startRecording();
+      } else {
+        setCountdown(count);
+      }
+    }, 1000);
+  }
 
-  /* ─ Recorder state ─ */
-  const [isRec, setIsRec] = useState(false);
-  const [audioURL, setAudioURL] = useState("");
-  const [blob, setBlob] = useState(null);
-  const [dur, setDur] = useState(0);
-  const [tag, setTag] = useState("Support");
-  const [note, setNote] = useState("");
-  const [saving, setSaving] = useState(false);
-
-  const rec = useRef(null);
-  const chunks = useRef([]);
-  const streamRef = useRef(null);
-  const tim = useRef(null);
-
-  /* ─ Timer for recorder ─ */
-  const startTimer = () => {
-    stopTimer();
-    const t0 = Date.now();
-    tim.current = setInterval(() => setDur(Math.floor((Date.now() - t0) / 1000)), 250);
-  };
-  const stopTimer = () => { if (tim.current) clearInterval(tim.current); tim.current = null; };
-
-  /* ─ Recording control ─ */
-  async function handleStart() {
+  async function startRecording() {
+    setErr("");
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      streamRef.current = stream;
-      chunks.current = [];
-      const mr = new MediaRecorder(stream);
-      rec.current = mr;
+      mediaStreamRef.current = stream;
 
-      mr.ondataavailable = (e) => { if (e?.data) chunks.current.push(e.data); };
-      mr.onstop = () => {
-        try {
-          const b = new Blob(chunks.current, { type: "audio/webm" });
-          setBlob(b);
-          setAudioURL((prev) => { if (prev) URL.revokeObjectURL(prev); return URL.createObjectURL(b); });
-        } catch (err) { console.error("Create blob failed:", err); }
-        finally { chunks.current = []; }
+      const mime = MediaRecorder.isTypeSupported("audio/webm;codecs=opus")
+        ? "audio/webm;codecs=opus" 
+        : "audio/webm";
+
+      const rec = new MediaRecorder(stream, { mimeType: mime });
+      recorderRef.current = rec;
+      chunksRef.current = [];
+      setRecording(true);
+      setWordIdx(0);
+      startedAtRef.current = performance.now();
+
+      rec.ondataavailable = (e) => e.data?.size && chunksRef.current.push(e.data);
+      rec.onstop = () => {
+        const blob = new Blob(chunksRef.current, { type: mime });
+        const url = URL.createObjectURL(blob);
+        setBlobUrl(url);
+        setRecording(false);
       };
 
-      mr.start();
-      setIsRec(true);
-      setDur(0);
-      startTimer();
-    } catch (err) {
-      console.error("Recording error:", err);
-      alert("Microphone permission required or not supported.");
-    }
-  }
+      tickerRef.current = setInterval(() => {
+        const elapsed = performance.now() - startedAtRef.current;
+        setDuration(Math.floor(elapsed / 1000));
+        setWordIdx((i) => Math.min(words.length - 1, i + 1));
+      }, SPEED_MS);
 
-  function handleStop() {
-    try {
-      if (rec.current && rec.current.state !== "inactive") rec.current.stop();
-      streamRef.current?.getTracks()?.forEach((t) => t.stop());
-    } catch (err) { console.error("Stop error:", err); }
-    finally { setIsRec(false); stopTimer(); }
-  }
-
-  function handleClear() {
-    try { if (audioURL) URL.revokeObjectURL(audioURL); } catch {}
-    setAudioURL(""); setBlob(null); setDur(0); setNote("");
-  }
-
-  function handleDownload() {
-    if (!blob) return;
-    const a = document.createElement("a");
-    a.href = URL.createObjectURL(blob);
-    a.download = `cheer-${item?.id || "item"}-${Date.now()}.webm`;
-    a.click();
-  }
-
-  /* ─ IndexedDB local save ─ */
-  async function idbSave(entry) {
-    const DB = "everysay";
-    const STORE = "stack";
-    const db = await new Promise((resolve, reject) => {
-      const req = indexedDB.open(DB, 1);
-      req.onupgradeneeded = () => {
-        const d = req.result;
-        if (!d.objectStoreNames.contains(STORE))
-          d.createObjectStore(STORE, { keyPath: "id", autoIncrement: true });
-      };
-      req.onsuccess = () => resolve(req.result);
-      req.onerror = () => reject(req.error);
-    });
-    await new Promise((resolve, reject) => {
-      const tx = db.transaction(STORE, "readwrite");
-      tx.objectStore(STORE).add(entry).onsuccess = () => resolve();
-      tx.onerror = () => reject(tx.error);
-    });
-  }
-
-  /* ─ Supabase upload ─ */
-  async function supaUpload({ blob, item, tag, note, dur }) {
-    try {
-      if (!supa?.storage?.from) throw new Error("Supabase client not configured.");
-      const path = `users/demo/${item.id}/${Date.now()}.webm`;
-      const res = await supa.storage.from("recordings").upload(path, blob, {
-        contentType: "audio/webm",
-        upsert: false,
-        metadata: { tag, note, item: item.id, duration: dur },
-      });
-      if (res.error) throw res.error;
-      const pub = supa.storage.from("recordings").getPublicUrl(path);
-      return pub?.data?.publicUrl || null;
-    } catch (err) {
-      console.error("Cloud upload error:", err);
-      throw new Error(`[Cloud error] ${err?.message || err}`);
-    }
-  }
-
-  /* ─ Sent & Save ─ */
-  async function handleSentAndSave() {
-    if (!blob) { alert("Record first, then save."); return; }
-    setSaving(true);
-    let cloudUrl = null;
-    try {
-      try { cloudUrl = await supaUpload({ blob, item, tag, note, dur }); }
-      catch (e) { alert(`${e.message}\n\nFalling back to local stack.`); }
-
-      const createdAt = new Date().toISOString();
-      await idbSave({ createdAt, tag, note, duration: dur, itemId: item.id, title: item.title, cloudUrl, blob });
-
-      alert(cloudUrl ? "Stacked & Sent! (Cloud + Local)" : "Stacked locally. (Cloud unavailable)");
-      safeClose();
+      rec.start();
     } catch (e) {
-      alert(`Save failed: ${e.message || e}`); console.error("Save error:", e);
-    } finally { setSaving(false); }
+      console.error(e);
+      setErr("마이크 권한이 거부되었거나 사용할 수 없습니다.");
+      cleanupMedia();
+    }
   }
 
-  /* ─ helpers ─ */
-  const mm = String(Math.floor(dur / 60)).padStart(2, "0");
-  const ss = String(dur % 60).padStart(2, "0");
-  const vmm = videoDur != null ? String(Math.floor(videoDur / 60)).padStart(2, "0") : null;
-  const vss = videoDur != null ? String(Math.round(videoDur % 60)).padStart(2, "0") : null;
+  function stopRecording() {
+    try {
+      clearInterval(tickerRef.current);
+      recorderRef.current?.stop();
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  async function handleSendAndStack() {
+    if (!blobUrl) return;
+    try {
+      const response = await fetch(blobUrl);
+      const blob = await response.blob();
+      const filename = `everysay-${Date.now()}.webm`;
+      const file = new File([blob], filename, { type: blob.type });
+      const metadata = {
+        preset: selectedPreset,
+        script: script,
+        duration: duration,
+        timestamp: Date.now(),
+        type: 'local-recording'
+      };
+
+      // 로컬 스택에 저장
+      await onStack?.(file, metadata);
+
+      // 성공 메시지 표시
+      setErr("녹음이 My Stack에 저장되었습니다!");
+
+      // 1초 후 모달 닫기
+      setTimeout(() => {
+        cleanupMedia();
+        onClose?.();
+      }, 1000);
+
+    } catch (e) {
+      console.error(e);
+      setErr("My Stack 저장 중 오류가 발생했습니다.");
+    }
+  }
+
+  function saveFile() {
+    if (!blobUrl) return;
+    const a = document.createElement("a");
+    a.href = blobUrl;
+    a.download = `everysay-${Date.now()}.webm`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+  }
+
+  if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-[120]">
-      <div className="absolute inset-0 bg-black/70" onClick={safeClose} />
-      <div className="absolute inset-0 flex items-center justify-center p-4">
-        <div className="w-full max-w-xl rounded-2xl bg-background border border-border shadow-2xl overflow-hidden">
-          {/* Header */}
-          <div className="flex items-center justify-between p-4 border-b border-border">
-            <h2 className="text-lg font-semibold">Send a Cheer</h2>
-            <button onClick={safeClose} className="rounded-lg px-3 py-1.5 text-sm border hover:bg-muted">
-              Close
-            </button>
+    <div className="fixed inset-0 z-50 grid place-items-center bg-black/60 p-4">
+      <div className="w-full max-w-2xl rounded-2xl border border-white/10 bg-[#0b1220] p-5 shadow-xl overflow-y-auto max-h-[90vh]">
+        {/* Header */}
+        <div className="mb-4 flex items-center justify-between">
+          <h3 className="text-lg font-semibold">
+            {item?.title || "EVERYSAY Cheer"}
+          </h3>
+          <button
+            onClick={() => {
+              cleanupMedia();
+              onClose?.();
+            }}
+            className="rounded-lg px-3 py-1 text-sm border border-white/20 hover:bg-white/10"
+          >
+            닫기
+          </button>
+        </div>
+
+        {err && (
+          <div className={`mb-3 rounded-lg border px-3 py-2 text-sm ${
+            err.includes("저장되었습니다") 
+              ? "border-green-500/30 bg-green-500/10 text-green-200"
+              : "border-red-500/30 bg-red-500/10 text-red-200"
+          }`}>
+            {err}
           </div>
+        )}
 
-          {/* Body */}
-          <div className="p-4 space-y-3">
-            {/* Media (video preferred, image fallback) */}
-            <div className="relative aspect-[4/3] bg-neutral-900 rounded-xl overflow-hidden">
-              {item?.video ? (
-                <video
-                  ref={videoRef}
-                  key={item.video}
-                  src={item.video}
-                  autoPlay     // ← autoplay
-                  muted        // ← policy
-                  playsInline  // ← iOS
-                  controls     // keep controls visible
-                  preload="metadata"
-                  className="w-full h-full object-cover"
-                  onLoadedMetadata={(e) => setVideoDur(e.currentTarget.duration || 0)}
-                />
-              ) : item?.image ? (
-                <img src={item.image} alt={item?.title || "cheer"} className="w-full h-full object-cover" loading="lazy" />
-              ) : (
-                <div className="w-full h-full grid place-items-center text-neutral-500 text-sm">No media</div>
-              )}
-
-              {videoDur != null && item?.video && (
-                <span className="absolute right-2 top-2 text-[11px] px-2 py-0.5 rounded-md bg-black/70 text-white">
-                  {vmm}:{vss}
-                </span>
-              )}
+        <div className="space-y-5">
+          {/* 영상 미리보기 */}
+          {item?.video && (
+            <div className="relative rounded-xl overflow-hidden border border-white/10 bg-black">
+              <video
+                ref={videoRef}
+                src={item.video}
+                controls
+                className="w-full max-h-[360px] object-cover"
+              />
             </div>
+          )}
 
-            {/* Copy */}
-            <div>
-              <div className="text-base font-semibold">{item?.title || "Cheer"}</div>
-              {!!item?.subtitle && <div className="text-xs text-neutral-400">{item.subtitle}</div>}
-              {!!item?.cheer && <div className="mt-2 text-sm text-neutral-300">{item.cheer}</div>}
-            </div>
-
-            {/* Recorder */}
-            <div className="rounded-xl border border-border p-3">
-              <div className="flex items-center justify-between">
-                <div className="text-sm text-neutral-400">Recorder</div>
-                <div className="text-sm font-mono">{mm}:{ss}</div>
-              </div>
-
-              <div className="mt-2 flex flex-wrap items-center gap-2">
-                {!isRec ? (
-                  <button onClick={handleStart} className="px-3 py-1.5 rounded-xl bg-pink-500 hover:bg-pink-600 text-white text-sm">
-                    🎙 Start
-                  </button>
-                ) : (
-                  <button onClick={handleStop} className="px-3 py-1.5 rounded-xl bg-neutral-800 hover:bg-neutral-700 border border-neutral-700 text-sm">
-                    ⏹ Stop
-                  </button>
-                )}
-
-                <button onClick={handleClear} disabled={!audioURL} className="px-3 py-1.5 rounded-xl border hover:bg-muted text-sm disabled:opacity-40">
-                  Clear
-                </button>
-                <button onClick={handleDownload} disabled={!blob} className="px-3 py-1.5 rounded-xl border hover:bg-muted text-sm disabled:opacity-40">
-                  Download
-                </button>
-
-                {audioURL && <audio controls src={audioURL} className="ml-auto w-full sm:w-auto" />}
-              </div>
-
-              {/* Options */}
-              <div className="mt-3 grid grid-cols-1 sm:grid-cols-3 gap-2">
-                <label className="text-sm">
-                  <span className="block text-neutral-400 mb-1">Emotion Tag</span>
-                  <select value={tag} onChange={(e) => setTag(e.target.value)} className="w-full rounded-xl border border-border bg-background p-2">
-                    <option>Support</option><option>Love</option><option>Hope</option><option>Prayer</option><option>Encourage</option>
-                  </select>
-                </label>
-                <label className="sm:col-span-2 text-sm">
-                  <span className="block text-neutral-400 mb-1">Note (optional)</span>
-                  <input value={note} onChange={(e) => setNote(e.target.value)} className="w-full rounded-xl border border-border bg-background p-2" placeholder="One line for your cheer…" />
-                </label>
-              </div>
-            </div>
-
-            {/* Action */}
-            <div className="flex items-center gap-2">
+          {/* 프리셋 선택 */}
+          <div className="space-y-3">
+            <p className="text-sm text-neutral-300">스크립트 선택:</p>
+            <div className="flex flex-wrap gap-2">
               <button
-                onClick={handleSentAndSave}
-                disabled={!blob || saving}
-                className="ml-auto inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-pink-600 hover:bg-pink-700 text-sm font-medium text-white disabled:opacity-40"
+                onClick={() => setSelectedPreset("yc")}
+                className={`rounded-xl px-4 py-2 ${
+                  selectedPreset === "yc"
+                    ? "bg-pink-500 text-white"
+                    : "border border-white/20 text-neutral-200 hover:bg-white/10"
+                }`}
               >
-                {saving ? "Saving…" : "💗 Sent & Save"}
+                1. I love YCombinator
+              </button>
+              <button
+                onClick={() => setSelectedPreset("bts")}
+                className={`rounded-xl px-4 py-2 ${
+                  selectedPreset === "bts"
+                    ? "bg-pink-500 text-white"
+                    : "border border-white/20 text-neutral-200 hover:bg-white/10"
+                }`}
+              >
+                2. I love BTS
+              </button>
+              <button
+                onClick={() => setSelectedPreset("lord")}
+                className={`rounded-xl px-4 py-2 ${
+                  selectedPreset === "lord"
+                    ? "bg-pink-500 text-white"
+                    : "border border-white/20 text-neutral-200 hover:bg-white/10"
+                }`}
+              >
+                3. I love you Lord, Amen
               </button>
             </div>
+          </div>
 
-            <div className="text-[11px] text-neutral-500">
-              Prototype: “Sent & Save” tries cloud first, then stacks locally if cloud is unavailable.
+          {/* 가이드 + 선택된 스크립트 */}
+          {selectedPreset && (
+            <div className="rounded-xl border border-white/10 bg-white/5 p-3 space-y-2">
+              <p className="text-sm text-neutral-300">{GUIDE_TEXT}</p>
+              <p className="text-[13px] leading-6 text-neutral-200">
+                <b>읽을 문장:</b> {script}
+              </p>
             </div>
+          )}
+
+          {/* 녹음 상태 및 컨트롤 */}
+          <div className="space-y-3">
+            {recording ? (
+              <>
+                <div className="flex items-center gap-2 text-sm">
+                  <span className="inline-flex h-2 w-2 animate-pulse rounded-full bg-pink-400" />
+                  <span className="text-neutral-300">
+                    녹음 중... {duration}초
+                  </span>
+                </div>
+                <Karaoke words={words} currentIndex={wordIdx} />
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={stopRecording}
+                    className="rounded-xl bg-white/10 px-4 py-2 text-white hover:bg-white/20"
+                  >
+                    ⏹ 녹음 중지
+                  </button>
+                  <button
+                    onClick={() => {
+                      cleanupMedia();
+                      resetAll();
+                    }}
+                    className="rounded-xl border border-white/20 px-3 py-2 text-sm hover:bg-white/10"
+                  >
+                    취소
+                  </button>
+                </div>
+              </>
+            ) : counting ? (
+              <div className="flex items-center justify-center">
+                <div className="relative">
+                  <div className="text-6xl font-bold text-pink-500 animate-pulse">
+                    {countdown}
+                  </div>
+                  <div className="absolute inset-0 animate-ping rounded-full bg-pink-500/20" />
+                </div>
+              </div>
+            ) : (
+              <>
+                <button
+                  onClick={startCountdown}
+                  disabled={!selectedPreset}
+                  className={`rounded-xl px-4 py-2 w-full ${
+                    selectedPreset
+                      ? "bg-pink-500 text-white hover:bg-pink-600"
+                      : "bg-neutral-700 text-neutral-400 cursor-not-allowed"
+                  }`}
+                >
+                  {selectedPreset ? "🎙 녹음 시작" : "스크립트를 선택해주세요"}
+                </button>
+
+                {blobUrl && (
+                  <div className="space-y-3">
+                    <audio controls src={blobUrl} className="w-full" />
+                    <div className="flex flex-col gap-2">
+                      {/* Send & Stack 버튼 */}
+                      <button
+                        onClick={handleSendAndStack}
+                        className="w-full rounded-xl bg-pink-500 px-4 py-2.5 text-white hover:bg-pink-600 font-medium"
+                      >
+                        🚀 Send & Stack
+                      </button>
+                      
+                      {/* 보조 액션 버튼들 */}
+                      <div className="flex gap-2">
+                        <button
+                          onClick={saveFile}
+                          className="flex-1 rounded-xl border border-white/20 px-3 py-2 text-sm hover:bg-white/10"
+                        >
+                          💾 다운로드
+                        </button>
+                        <button
+                          onClick={() => {
+                            resetAll();
+                            setSelectedPreset("");
+                          }}
+                          className="flex-1 rounded-xl border border-white/20 px-3 py-2 text-sm hover:bg-white/10"
+                        >
+                          🔄 다시 녹음
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </>
+            )}
           </div>
         </div>
       </div>
+    </div>
+  );
+}
+
+function Karaoke({ words, currentIndex }) {
+  return (
+    <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+      <p className="text-[15px] leading-8 flex flex-wrap gap-x-1.5">
+        {words.map((w, i) => {
+          const state = i < currentIndex ? "past" : i === currentIndex ? "now" : "next";
+          return (
+            <span
+              key={i}
+              className={
+                state === "past"
+                  ? "text-pink-300"
+                  : state === "now"
+                  ? "text-white font-semibold underline decoration-pink-400 decoration-2 underline-offset-[6px]"
+                  : "text-neutral-400"
+              }
+            >
+              {w}
+            </span>
+          );
+        })}
+      </p>
     </div>
   );
 }

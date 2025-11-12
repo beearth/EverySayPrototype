@@ -41,7 +41,7 @@ export default function App() {
 
       <footer className="mt-10 border-t border-border px-4 py-6 text-center text-xs text-neutral-500">
         ⚠️ This is a prototype of the EVERYSAY Support Platform.
-        All recorded voices are temporary and deleted within 30 days.
+        All recorded voices are temporary and deleted within 365 days.
         No data is shared or used commercially.
       </footer>
     </div>

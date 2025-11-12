@@ -180,9 +180,6 @@ export default function MentorList() {
           actualTotal = cloudItems.length;
         }
 
-        // Ensure local-only recordings still reflect in the total count.
-        actualTotal = Math.max(actualTotal, finalSorted.length);
-
         let targetCount;
         let fillerCount = 0;
 
@@ -205,7 +202,7 @@ export default function MentorList() {
       }
 
       // If Supabase returned an error or empty data, fall back
-      const actualFallback = Math.max(sortedLocal.length, localCount);
+      const actualFallback = 0;
       let targetFallback;
       let fillerFallback = 0;
 
@@ -226,7 +223,7 @@ export default function MentorList() {
       setTotalCount(targetFallback);
     } catch (error) {
       console.error("[Load] Cloud fetch error:", error);
-      const actualFallback = Math.max(sortedLocal.length, localCount);
+      const actualFallback = 0;
       let targetFallback;
       let fillerFallback = 0;
 

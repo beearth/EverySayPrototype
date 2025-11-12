@@ -1,5 +1,5 @@
 // src/lib/videos.js
-const BASE = "https://jsfnsxqsfchncbqtmqlx.supabase.co/storage/v1/object/public/videos";
+const BASE = "/videos";
 export const videos = Array.from({ length: 21 }, (_, i) => {
   const n = i + 1;
   return {

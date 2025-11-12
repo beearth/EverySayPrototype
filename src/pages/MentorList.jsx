@@ -88,8 +88,7 @@ export default function MentorList() {
 
   /* Who to Cheer – use first 12 videos directly */
   const cheerCards = useMemo(() => {
-    const list = videos.slice(0, 12);
-    return list.map((v, i) => ({
+    return videos.map((v, i) => ({
       id: `c-${v.id}`,
       title: v.title, // e.g., EVERYSAY Demo 01
       subtitle: i % 2 === 0 ? "Community support" : "Global fandom support",

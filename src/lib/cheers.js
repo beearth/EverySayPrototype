@@ -2,10 +2,9 @@
 import { videos } from "./videos";
 
 /**
- * Use the first 12 videos from public/videos
- * Each item becomes a "Who to Cheer" card with a short clip.
+ * Use the full video library for the "Who to Cheer" cards.
  */
-export const cheers = videos.slice(0, 12).map((v, i) => ({
+export const cheers = videos.map((v, i) => ({
   id: `c-${v.id}`,
   title: v.title,             // e.g., EVERYSAY Demo 01
   subtitle: i % 2 === 0 ? "Community support" : "Global fandom support",

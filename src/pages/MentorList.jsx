@@ -180,6 +180,9 @@ export default function MentorList() {
           actualTotal = cloudItems.length;
         }
 
+        // Ensure local-only recordings still reflect in the total count.
+        actualTotal = Math.max(actualTotal, finalSorted.length);
+
         let targetCount;
         let fillerCount = 0;
 
@@ -202,7 +205,7 @@ export default function MentorList() {
       }
 
       // If Supabase returned an error or empty data, fall back
-        const actualFallback = 0;
+      const actualFallback = Math.max(sortedLocal.length, localCount);
       let targetFallback;
       let fillerFallback = 0;
 
@@ -223,7 +226,7 @@ export default function MentorList() {
       setTotalCount(targetFallback);
     } catch (error) {
       console.error("[Load] Cloud fetch error:", error);
-      const actualFallback = 0;
+      const actualFallback = Math.max(sortedLocal.length, localCount);
       let targetFallback;
       let fillerFallback = 0;
 
@@ -277,14 +280,45 @@ export default function MentorList() {
   }, []);
 
   useEffect(() => {
-    supa.auth.getSession().then(({ data }) => setSession(data.session ?? null));
-    const {
-      data: authListener,
-    } = supa.auth.onAuthStateChange((_event, newSession) => {
-      setSession(newSession);
+    let isActive = true;
+
+    async function ensureSession() {
+      try {
+        const { data, error } = await supa.auth.getSession();
+        if (error) throw error;
+
+        let currentSession = data.session ?? null;
+
+        // Attempt lightweight anonymous sign-in so unauthenticated users
+        // can still contribute to the global stack.
+        if (!currentSession && typeof supa.auth.signInAnonymously === "function") {
+          const { data: anonData, error: anonError } = await supa.auth.signInAnonymously();
+          if (anonError) {
+            console.warn("[Auth] Anonymous sign-in failed:", anonError);
+          } else {
+            currentSession = anonData.session ?? null;
+          }
+        }
+
+        if (isActive) {
+          setSession(currentSession);
+        }
+      } catch (err) {
+        console.warn("[Auth] Session init error:", err);
+      }
+    }
+
+    ensureSession();
+
+    const { data: authListener } = supa.auth.onAuthStateChange((_event, newSession) => {
+      if (isActive) {
+        setSession(newSession);
+      }
     });
+
     return () => {
-      authListener.subscription.unsubscribe();
+      isActive = false;
+      authListener?.subscription?.unsubscribe();
     };
   }, []);
 

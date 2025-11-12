@@ -56,16 +56,29 @@ function withDemoFill(items, fillerCount) {
    Filter out non-existing files (404) for the video modal
    ───────────────────────────────────────── */
 async function filterExisting(list) {
+  if (!Array.isArray(list) || list.length === 0) return [];
+
   const tested = await Promise.all(
     list.map(async (v) => {
+      if (!v?.src) return null;
       try {
-        const r = await fetch(v.src, { method: "HEAD" });
-        return r.ok ? v : null;
+        const res = await fetch(v.src, { method: "HEAD" });
+
+        if (res.status === 404) {
+          return null;
+        }
+
+        // Some hosts (including Vercel static) can reply 405 for HEAD,
+        // or other non-OK codes even though GET would succeed.
+        // In that case, trust the file exists and keep the entry.
+        return res.ok ? v : v;
       } catch {
-        return null;
+        // Network errors (local dev offline) → keep the item so UX degrades gracefully.
+        return v;
       }
     })
   );
+
   return tested.filter(Boolean);
 }
 

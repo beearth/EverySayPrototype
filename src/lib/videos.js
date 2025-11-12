@@ -1,5 +1,13 @@
 // src/lib/videos.js
-const BASE = "/videos";
+const baseUrl =
+  (typeof import.meta !== "undefined" && import.meta.env?.BASE_URL) || "/";
+
+const cleanedBase = baseUrl.endsWith("/")
+  ? baseUrl.slice(0, -1)
+  : baseUrl || "";
+
+const BASE = `${cleanedBase}/videos`;
+
 export const videos = Array.from({ length: 21 }, (_, i) => {
   const n = i + 1;
   return {

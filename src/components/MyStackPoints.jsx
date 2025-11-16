@@ -1,9 +1,8 @@
 import { useCallback, useEffect, useState } from "react";
 import { supa } from "../lib/supa";
 
-export default function MyStackPoints({ session, refreshKey = 0 }) {
+export default function MyStackPoints({ guestId, refreshKey = 0 }) {
   const [points, setPoints] = useState(0);
-  const userId = session?.user?.id ?? null;
 
   const loadPoints = useCallback(
     async (targetUserId) => {
@@ -23,22 +22,22 @@ export default function MyStackPoints({ session, refreshKey = 0 }) {
   );
 
   useEffect(() => {
-    loadPoints(userId);
-  }, [userId, refreshKey, loadPoints]);
+    loadPoints(guestId);
+  }, [guestId, refreshKey, loadPoints]);
 
   useEffect(() => {
-    if (!userId) return;
+    if (!guestId) return;
     const channel = supa
-      .channel(`recordings-meta-points-${userId}`)
+      .channel(`recordings-meta-points-${guestId}`)
       .on(
         "postgres_changes",
         {
           event: "INSERT",
           schema: "public",
           table: "recordings_meta",
-          filter: `user_id=eq.${userId}`,
+          filter: `user_id=eq.${guestId}`,
         },
-        () => loadPoints(userId)
+        () => loadPoints(guestId)
       )
       .on(
         "postgres_changes",
@@ -46,16 +45,16 @@ export default function MyStackPoints({ session, refreshKey = 0 }) {
           event: "DELETE",
           schema: "public",
           table: "recordings_meta",
-          filter: `user_id=eq.${userId}`,
+          filter: `user_id=eq.${guestId}`,
         },
-        () => loadPoints(userId)
+        () => loadPoints(guestId)
       )
       .subscribe();
 
     return () => {
       supa.removeChannel(channel);
     };
-  }, [userId, loadPoints]);
+  }, [guestId, loadPoints]);
 
   return (
     <div className="rounded-lg bg-pink-500/10 border border-pink-500/30 px-3 py-1.5 text-pink-200 text-sm">

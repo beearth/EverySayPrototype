@@ -18,6 +18,7 @@ export default function CheerModal({
   onSend,
   onStack,
   session,
+  guestId,
 }) {
   const [err, setErr] = useState("");
   const [recording, setRecording] = useState(false);
@@ -174,7 +175,7 @@ export default function CheerModal({
       if (!blob || !blob.size) throw new Error("Empty audio (0 bytes).");
       if (!blob.type) blob = new Blob([blob], { type: "audio/webm" });
 
-      const key = makeRecordingKey({ uid: "demo", room: "demo1" });
+      const key = makeRecordingKey({ uid: guestId || "guest", room: "demo1" });
       console.log("[Upload] Starting upload to:", key, "Size:", blob.size, "Type:", blob.type);
       
       const { data, error } = await supaMain.storage
@@ -191,15 +192,8 @@ export default function CheerModal({
       const pub = supaMain.storage.from("recordings").getPublicUrl(data.path).data.publicUrl;
 
       // Save metadata to Supabase table for realtime sync
-      const {
-        data: { user },
-        error: userError,
-      } = await supaMain.auth.getUser();
-      if (userError) {
-        console.error("[Auth] Failed to fetch user:", userError);
-      }
-
-      const currentUserId = user?.id ?? session?.user?.id ?? null;
+      // Use guestId for user_id
+      const currentUserId = guestId || null;
 
       const { error: dbError } = await supaMain
         .from("recordings")

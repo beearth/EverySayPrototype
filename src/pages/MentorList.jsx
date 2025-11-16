@@ -82,7 +82,7 @@ async function filterExisting(list) {
   return tested.filter(Boolean);
 }
 
-export default function MentorList() {
+export default function MentorList({ guestId }) {
   /* Video modal */
   const [openVideo, setOpenVideo] = useState(false);
   const [videoItems, setVideoItems] = useState([]);
@@ -479,10 +479,7 @@ export default function MentorList() {
                   </div>
                 </div>
 
-                <MyStackPoints
-                  session={session}
-                  refreshKey={stackRefresh}
-                />
+                <MyStackPoints guestId={guestId} refreshKey={stackRefresh} />
               </div>
             </div>
           </div>
@@ -603,6 +600,7 @@ export default function MentorList() {
         onClose={() => setCheerOpen(false)}
         item={cheerItem}
         session={session}
+        guestId={guestId}
         onStack={async (file, metadata) => {
           try {
             await addToStack(file, metadata);

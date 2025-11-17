@@ -73,6 +73,7 @@ export default function CheerModal({
     setSelectedPreset("");
     setCountdown(0);
     setCounting(false);
+    setDontShowConsent(false); // Reset checkbox when modal opens
     clearInterval(tickerRef.current);
     clearInterval(countdownRef.current);
   }
@@ -172,9 +173,14 @@ export default function CheerModal({
 
   function hasConsent() {
     try {
-      const until = Number(window.localStorage.getItem("everysay_consent_until") || 0);
-      return Number.isFinite(until) && until > Date.now();
-    } catch {
+      const until = window.localStorage.getItem("everysay_consent_until");
+      if (!until) return false;
+      const untilNum = Number(until);
+      const hasIt = Number.isFinite(untilNum) && untilNum > Date.now();
+      console.log("[Consent] hasConsent check:", { until, untilNum, now: Date.now(), hasIt });
+      return hasIt;
+    } catch (e) {
+      console.error("[Consent] hasConsent error:", e);
       return false;
     }
   }
@@ -188,18 +194,34 @@ export default function CheerModal({
   }
 
   async function handleSendAndStack(bypassConsent = false) {
-    try {
-      // Open consent modal if needed
-      if (!hasConsent() && !bypassConsent) {
+    console.log("[Consent] handleSendAndStack called", {
+      bypassConsent: bypassConsent,
+      bypassConsentType: typeof bypassConsent,
+      hasBlobUrl: !!blobUrl
+    });
+    
+    // Show consent modal if not bypassed AND user hasn't consented yet
+    if (bypassConsent !== true) {
+      const hasConsentNow = hasConsent();
+      console.log("[Consent] Checking consent - hasConsentNow:", hasConsentNow);
+      if (!hasConsentNow) {
+        console.log("[Consent] Opening consent modal (no consent found)");
+        setDontShowConsent(false); // Reset checkbox when opening consent modal
         setConsentOpen(true);
         return;
       }
+      console.log("[Consent] User has consent, proceeding with upload...");
+    }
 
-      if (!blobUrl) {
-        setErr("Please record first.");
-        return;
-      }
+    // If we get here, consent was bypassed (user clicked "I Agree & Send")
+    console.log("[Consent] Bypassed (bypassConsent === true), proceeding with upload...");
+    
+    if (!blobUrl) {
+      setErr("Please record first.");
+      return;
+    }
 
+    try {
       setSaving(true);
       const res = await fetch(blobUrl);
       let blob = await res.blob();
@@ -505,12 +527,15 @@ export default function CheerModal({
       </div>
 
       {/* Consent Modal (custom) */}
-      {consentOpen && (
+      {(() => {
+        console.log("[Consent] Rendering check - consentOpen:", consentOpen);
+        return consentOpen;
+      })() && (
         <div className="fixed inset-0 z-[60] grid place-items-center bg-black/70 p-4">
           <div className="w-full max-w-lg rounded-2xl border border-white/10 bg-[#0b1220] p-5 shadow-2xl">
             <h4 className="text-lg font-semibold mb-2">Consent required</h4>
             <p className="text-sm text-neutral-300 mb-3">
-              By sending, you agree that your voice may be used in the EVERYSAY prototype and can be stored up to 365 days.
+              By sending, you agree that your voice may be used in the EVERYSAY prototype and can be stored up to 180 days.
             </p>
             <ul className="list-disc pl-5 text-[13px] text-neutral-400 space-y-1 mb-4">
               <li>
@@ -533,7 +558,7 @@ export default function CheerModal({
                 checked={dontShowConsent}
                 onChange={(e) => setDontShowConsent(e.target.checked)}
               />
-              Don't show again for 30 days on this browser
+              Don't show this consent dialog again for 30 days
             </label>
 
             <div className="flex justify-end gap-2">

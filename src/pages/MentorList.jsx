@@ -299,9 +299,10 @@ export default function MentorList({ guestId }) {
 
         let currentSession = data.session ?? null;
 
-        // Attempt lightweight anonymous sign-in so unauthenticated users
-        // can still contribute to the global stack.
-        if (!currentSession && typeof supa.auth.signInAnonymously === "function") {
+        // Attempt lightweight anonymous sign-in only when explicitly enabled
+        // via environment variable VITE_ENABLE_ANON_SIGNIN=true
+        const enableAnon = String(import.meta.env.VITE_ENABLE_ANON_SIGNIN || "").toLowerCase() === "true";
+        if (!currentSession && enableAnon && typeof supa.auth.signInAnonymously === "function") {
           const { data: anonData, error: anonError } = await supa.auth.signInAnonymously();
           if (anonError) {
             console.warn("[Auth] Anonymous sign-in failed:", anonError);
@@ -479,7 +480,7 @@ export default function MentorList({ guestId }) {
                   </div>
                 </div>
 
-                <MyStackPoints guestId={guestId} refreshKey={stackRefresh} />
+                <MyStackPoints session={session} refreshKey={stackRefresh} />
               </div>
             </div>
           </div>

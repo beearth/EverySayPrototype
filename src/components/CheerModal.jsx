@@ -28,6 +28,9 @@ export default function CheerModal({
   const [selectedPreset, setSelectedPreset] = useState("");
   const [countdown, setCountdown] = useState(0);
   const [counting, setCounting] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [consentOpen, setConsentOpen] = useState(false);
+  const [dontShowConsent, setDontShowConsent] = useState(false);
 
   const videoRef = useRef(null);
   const mediaStreamRef = useRef(null);
@@ -167,9 +170,37 @@ export default function CheerModal({
     }
   }
 
-  async function handleSendAndStack() {
-    if (!blobUrl) return;
+  function hasConsent() {
     try {
+      const until = Number(window.localStorage.getItem("everysay_consent_until") || 0);
+      return Number.isFinite(until) && until > Date.now();
+    } catch {
+      return false;
+    }
+  }
+
+  function requestConsentOr(fn) {
+    if (hasConsent()) {
+      fn();
+      return;
+    }
+    setConsentOpen(true);
+  }
+
+  async function handleSendAndStack(bypassConsent = false) {
+    try {
+      // Open consent modal if needed
+      if (!hasConsent() && !bypassConsent) {
+        setConsentOpen(true);
+        return;
+      }
+
+      if (!blobUrl) {
+        setErr("Please record first.");
+        return;
+      }
+
+      setSaving(true);
       const res = await fetch(blobUrl);
       let blob = await res.blob();
       if (!blob || !blob.size) throw new Error("Empty audio (0 bytes).");
@@ -192,8 +223,8 @@ export default function CheerModal({
       const pub = supaMain.storage.from("recordings").getPublicUrl(data.path).data.publicUrl;
 
       // Save metadata to Supabase table for realtime sync
-      // Use guestId for user_id
-      const currentUserId = guestId || null;
+      // Auth user id (if logged in). Keep null for guests.
+      const currentUserId = session?.user?.id ?? null;
 
       const { error: dbError } = await supaMain
         .from("recordings")
@@ -205,6 +236,7 @@ export default function CheerModal({
           duration: duration,
           created_at: new Date().toISOString(),
           user_id: currentUserId,
+          guest_id: guestId || null,
         });
       
       if (dbError) {
@@ -219,6 +251,7 @@ export default function CheerModal({
         preset: selectedPreset || null,
         duration_ms: (duration ?? 0) * 1000,
         user_id: currentUserId,
+        guest_id: guestId || null,
       });
 
       // keep existing onStack, but include cloud info:
@@ -249,6 +282,8 @@ export default function CheerModal({
       console.error(e);
       const msg = e?.message || e?.error?.message || JSON.stringify(e);
       setErr(`Upload/Save error: ${msg}`);
+    } finally {
+      setSaving(false);
     }
   }
 
@@ -432,9 +467,14 @@ export default function CheerModal({
                       {/* Send & Stack 버튼 */}
                       <button
                         onClick={handleSendAndStack}
-                        className="w-full rounded-xl bg-pink-500 px-4 py-2.5 text-white hover:bg-pink-600 font-medium"
+                        disabled={saving}
+                        className={`w-full rounded-xl px-4 py-2.5 font-medium ${
+                          saving
+                            ? "bg-neutral-600 text-neutral-300 cursor-not-allowed"
+                            : "bg-pink-500 text-white hover:bg-pink-600"
+                        }`}
                       >
-                        🚀 Send & Stack
+                        {saving ? "Saving..." : "🚀 Send & Stack"}
                       </button>
                       
                       {/* 보조 액션 버튼들 */}
@@ -463,6 +503,70 @@ export default function CheerModal({
           </div>
         </div>
       </div>
+
+      {/* Consent Modal (custom) */}
+      {consentOpen && (
+        <div className="fixed inset-0 z-[60] grid place-items-center bg-black/70 p-4">
+          <div className="w-full max-w-lg rounded-2xl border border-white/10 bg-[#0b1220] p-5 shadow-2xl">
+            <h4 className="text-lg font-semibold mb-2">Consent required</h4>
+            <p className="text-sm text-neutral-300 mb-3">
+              By sending, you agree that your voice may be used in the EVERYSAY prototype and can be stored up to 365 days.
+            </p>
+            <ul className="list-disc pl-5 text-[13px] text-neutral-400 space-y-1 mb-4">
+              <li>
+                Terms of Use:{" "}
+                <a href="/terms.html" target="_blank" rel="noreferrer" className="text-pink-300 underline">
+                  View terms
+                </a>
+              </li>
+              <li>
+                Retention Policy:{" "}
+                <a href="/retention.html" target="_blank" rel="noreferrer" className="text-pink-300 underline">
+                  View policy
+                </a>
+              </li>
+            </ul>
+            <label className="flex items-center gap-2 text-sm text-neutral-300 mb-4 select-none cursor-pointer">
+              <input
+                type="checkbox"
+                className="h-4 w-4 rounded border-white/20 bg-transparent"
+                checked={dontShowConsent}
+                onChange={(e) => setDontShowConsent(e.target.checked)}
+              />
+              Don't show again for 30 days on this browser
+            </label>
+
+            <div className="flex justify-end gap-2">
+              <button
+                onClick={() => {
+                  setConsentOpen(false);
+                  setErr("Send cancelled.");
+                }}
+                className="rounded-lg border border-white/20 px-3 py-1.5 text-sm hover:bg-white/10"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  try {
+                    if (dontShowConsent) {
+                      const THIRTY_DAYS = 30 * 24 * 60 * 60 * 1000;
+                      const until = Date.now() + THIRTY_DAYS;
+                      window.localStorage.setItem("everysay_consent_until", String(until));
+                    }
+                  } catch {}
+                  setConsentOpen(false);
+                  // Continue with upload now that consent is granted
+                  handleSendAndStack(true);
+                }}
+                className="rounded-lg bg-pink-500 px-4 py-1.5 text-sm text-white hover:bg-pink-600"
+              >
+                I Agree & Send
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

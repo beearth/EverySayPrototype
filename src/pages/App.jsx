@@ -1,13 +1,11 @@
 // src/pages/App.jsx
 import { useEffect, useState } from "react";
 import MentorList from "./MentorList";
-import ConsentModal from "../components/ConsentModal";
 import AuthButtons from "../components/AuthButtons";
 import { supaMain as supa } from "../lib/supa";
 import { getGuestId } from "../utils/guestId";
 
 export default function App() {
-  const [agreed, setAgreed] = useState(false);
   const [guestId, setGuestId] = useState(null);
 
   useEffect(() => {
@@ -42,8 +40,6 @@ export default function App() {
   if (!guestId) {
     return <div className="text-white text-center p-10">Loading...</div>;
   }
-
-  if (!agreed) return <ConsentModal onAgree={() => setAgreed(true)} />;
 
   return (
     <div className="min-h-screen bg-background text-foreground">

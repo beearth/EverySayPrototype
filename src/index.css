@@ -67,3 +67,19 @@
   transform-origin: top;
   opacity: 0.3;
 }
+
+/* Word Study Success Animation */
+@keyframes fade-in-up {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up 0.3s ease-out;
+}

@@ -8,7 +8,7 @@ const STATS_STORE = "stats";
 // IndexedDB helper
 async function openDB() {
   return await new Promise((resolve, reject) => {
-    const req = indexedDB.open(DB_NAME, 2);
+    const req = indexedDB.open(DB_NAME, 3);
     req.onupgradeneeded = () => {
       const db = req.result;
       if (!db.objectStoreNames.contains(STORE)) {
@@ -16,6 +16,9 @@ async function openDB() {
       }
       if (!db.objectStoreNames.contains(STATS_STORE)) {
         db.createObjectStore(STATS_STORE, { keyPath: "key" });
+      }
+      if (!db.objectStoreNames.contains("wordStudy")) {
+        db.createObjectStore("wordStudy", { keyPath: "wordId" });
       }
     };
     req.onsuccess = () => resolve(req.result);
@@ -75,13 +78,16 @@ async function add(file, metadata) {
     };
     const stackReq = tx.objectStore(STORE).add(item);
     
-    // Increment total count
-    const statsStore = tx.objectStore(STATS_STORE);
-    const countReq = statsStore.get("totalCount");
-    countReq.onsuccess = () => {
-      const current = countReq.result?.value || 0;
-      statsStore.put({ key: "totalCount", value: current + 1 });
-    };
+    // Increment total count ONLY if this is NOT a cloud-synced item
+    // Cloud items are already counted in Supabase, so we don't double-count
+    if (!metadata.cloudPath) {
+      const statsStore = tx.objectStore(STATS_STORE);
+      const countReq = statsStore.get("totalCount");
+      countReq.onsuccess = () => {
+        const current = countReq.result?.value || 0;
+        statsStore.put({ key: "totalCount", value: current + 1 });
+      };
+    }
     
     stackReq.onsuccess = () => resolve(stackReq.result);
     stackReq.onerror = () => reject(stackReq.error);

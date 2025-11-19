@@ -38,7 +38,7 @@ export default function ConsentModal({ onAgree }) {
           onClick={() => { if (checked) onAgree() }}
           disabled={!checked}
           className={`w-full px-6 py-4 rounded-2xl text-white text-lg font-semibold tracking-wide transition
-            ${checked ? "bg-pink-500 hover:bg-pink-600" : "bg-neutral-700 opacity-50"}`}
+            ${checked ? "bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600" : "bg-neutral-700 opacity-50"}`}
         >
           Agree and Continue
         </button>

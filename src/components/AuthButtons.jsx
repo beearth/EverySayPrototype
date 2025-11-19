@@ -41,7 +41,7 @@ export default function AuthButtons() {
       ) : (
         <button
           onClick={signInGoogle}
-          className="px-4 py-2 rounded-xl bg-pink-500 text-white hover:bg-pink-600 text-sm"
+          className="px-4 py-2 rounded-xl bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white text-sm"
         >
           Continue with Google
         </button>

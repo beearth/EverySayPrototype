@@ -3,6 +3,9 @@ import { useMemo, useState, useEffect } from "react";
 import { videos } from "../lib/videos";
 import CheerModal from "../components/CheerModal";
 import VideoGalleryModal from "../components/VideoGalleryModal";
+import PositiveChoiceModal from "../components/PositiveChoiceModal";
+import WordStudyModal from "../components/WordStudyModal";
+import LanguageSelector from "../components/LanguageSelector";
 import MyStackFeed, {
   addToStack,
   getTotalCount,
@@ -90,6 +93,8 @@ export default function MentorList({ guestId }) {
   /* Cheer modal */
   const [cheerOpen, setCheerOpen] = useState(false);
   const [cheerItem, setCheerItem] = useState(null);
+  const [positiveChoiceOpen, setPositiveChoiceOpen] = useState(false);
+  const [wordStudyOpen, setWordStudyOpen] = useState(false);
 
   /* Stack refresh trigger */
   const [stackRefresh, setStackRefresh] = useState(0);
@@ -131,13 +136,23 @@ export default function MentorList({ guestId }) {
       console.warn("[Load] Local stack unavailable:", err);
     }
 
+    // Count only local-only items (items without cloudPath)
+    // Items with cloudPath are already counted in Supabase
     try {
-      const count = await getTotalCount();
-      if (typeof count === "number" && !Number.isNaN(count)) {
-        localCount = count;
-      }
+      const localOnlyItems = localItems.filter(item => !item.cloudPath);
+      localCount = localOnlyItems.length;
+      console.log("[Load] Local-only items count:", localCount, "Total local items:", localItems.length);
     } catch (err) {
-      console.warn("[Load] Local count unavailable:", err);
+      console.warn("[Load] Local count calculation error:", err);
+      // Fallback to getTotalCount if filtering fails
+      try {
+        const count = await getTotalCount();
+        if (typeof count === "number" && !Number.isNaN(count)) {
+          localCount = count;
+        }
+      } catch (err2) {
+        console.warn("[Load] Local count unavailable:", err2);
+      }
     }
 
     const sortedLocal = [...localItems].sort(
@@ -193,6 +208,10 @@ export default function MentorList({ guestId }) {
           actualTotal = cloudItems.length;
         }
 
+        // Add local count to the total
+        actualTotal = actualTotal + localCount;
+        console.log("[Load] Local count:", localCount, "Cloud count:", totalCloudCount, "Total:", actualTotal);
+
         let targetCount;
         let fillerCount = 0;
 
@@ -215,7 +234,7 @@ export default function MentorList({ guestId }) {
       }
 
       // If Supabase returned an error or empty data, fall back
-      const actualFallback = 0;
+      const actualFallback = localCount;
       let targetFallback;
       let fillerFallback = 0;
 
@@ -228,6 +247,7 @@ export default function MentorList({ guestId }) {
         );
         fillerFallback = targetFallback - sortedLocal.length;
       }
+      console.log("[Load] Fallback - Local count:", localCount, "Target:", targetFallback);
 
       const demoFilledFallback =
         fillerFallback > 0 ? withDemoFill(sortedLocal, fillerFallback) : sortedLocal;
@@ -236,7 +256,7 @@ export default function MentorList({ guestId }) {
       setTotalCount(targetFallback);
     } catch (error) {
       console.error("[Load] Cloud fetch error:", error);
-      const actualFallback = 0;
+      const actualFallback = localCount;
       let targetFallback;
       let fillerFallback = 0;
 
@@ -249,6 +269,7 @@ export default function MentorList({ guestId }) {
         );
         fillerFallback = targetFallback - sortedLocal.length;
       }
+      console.log("[Load] Error fallback - Local count:", localCount, "Target:", targetFallback);
 
       const demoFilledFallback =
         fillerFallback > 0 ? withDemoFill(sortedLocal, fillerFallback) : sortedLocal;
@@ -487,12 +508,27 @@ export default function MentorList({ guestId }) {
 
           <div className="flex items-center justify-between">
             <h1 className="text-2xl font-bold">{TITLE}</h1>
-            <button
-              onClick={handleOpenVideos}
-              className="px-3 py-1.5 rounded-xl bg-pink-500 hover:bg-pink-600 text-white font-medium shadow-sm"
-            >
-              🎬 Watch Videos
-            </button>
+            <div className="flex gap-2 items-center">
+              <LanguageSelector />
+              <button
+                onClick={() => setWordStudyOpen(true)}
+                className="px-3 py-1.5 rounded-xl bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-medium shadow-sm"
+              >
+                📚 Word Study
+              </button>
+              <button
+                onClick={() => setPositiveChoiceOpen(true)}
+                className="px-3 py-1.5 rounded-xl bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-medium shadow-sm"
+              >
+                ✨ Positive Choice
+              </button>
+              <button
+                onClick={handleOpenVideos}
+                className="px-3 py-1.5 rounded-xl bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-medium shadow-sm"
+              >
+                🎬 Watch Videos
+              </button>
+            </div>
           </div>
 
           {/* search + quick categories (UI only) */}
@@ -580,7 +616,7 @@ export default function MentorList({ guestId }) {
                         setCheerItem(c);
                         setCheerOpen(true);
                       }}
-                      className="ml-auto inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-pink-500 hover:bg-pink-600 text-[12px] font-medium text-white"
+                      className="ml-auto inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-[12px] font-medium text-white"
                     >
                       💗 Cheer Now
                     </button>
@@ -616,6 +652,22 @@ export default function MentorList({ guestId }) {
         open={openVideo}
         onClose={() => setOpenVideo(false)}
         items={videoItems} // only existing files
+      />
+
+      <PositiveChoiceModal
+        open={positiveChoiceOpen}
+        onClose={() => setPositiveChoiceOpen(false)}
+        onStackComplete={() => {
+          setStackRefresh((prev) => prev + 1);
+        }}
+      />
+
+      <WordStudyModal
+        open={wordStudyOpen}
+        onClose={() => setWordStudyOpen(false)}
+        onStackComplete={() => {
+          setStackRefresh((prev) => prev + 1);
+        }}
       />
     </div>
   );

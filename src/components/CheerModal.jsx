@@ -55,7 +55,7 @@ export default function CheerModal({
     const rand = (crypto.randomUUID?.() || Math.random().toString(36).slice(2, 8));
     const dateFolder = `${yyyy}-${mm}-${dd}`;
     const filename   = `${yyyy}${mm}${dd}_${HH}${MI}${SS}${MS}_${uid}_${room}_${rand}.webm`;
-    return `users/${uid}/${room}/${dateFolder}/${filename}`;
+    return `${room}/${dateFolder}/${filename}`;
   }
 
   useEffect(() => {
@@ -229,18 +229,28 @@ export default function CheerModal({
       if (!blob.type) blob = new Blob([blob], { type: "audio/webm" });
 
       const key = makeRecordingKey({ uid: guestId || "guest", room: "demo1" });
-      console.log("[Upload] Starting upload to:", key, "Size:", blob.size, "Type:", blob.type);
+      console.log("[Upload] Starting upload to:", key);
+      console.log("[Upload] File size:", blob.size, "bytes, Type:", blob.type);
+      console.log("[Upload] Guest ID:", guestId || "guest");
+      console.log("[Upload] Date folder will be:", new Date().toISOString().split('T')[0]);
       
       const { data, error } = await supaMain.storage
         .from("recordings")
         .upload(key, blob, { contentType: blob.type || "audio/webm", upsert: false });
       
       if (error) {
-        console.error("[Upload] Supabase error:", error);
+        console.error("[Upload] Supabase storage error:", error);
+        console.error("[Upload] Error details:", JSON.stringify(error, null, 2));
         throw error;
       }
       
+      if (!data || !data.path) {
+        console.error("[Upload] No data returned from upload");
+        throw new Error("Upload failed: No data returned");
+      }
+      
       console.log("[Upload] Success! Path:", data.path);
+      console.log("[Upload] Full key:", key);
 
       const pub = supaMain.storage.from("recordings").getPublicUrl(data.path).data.publicUrl;
 
@@ -266,15 +276,22 @@ export default function CheerModal({
         // Continue anyway - local storage still works
       }
 
-      await supaMain.from("recordings_meta").insert({
-        file_path: data.path,
-        mime_type: blob.type || "audio/webm",
-        size_bytes: blob.size ?? 0,
-        preset: selectedPreset || null,
-        duration_ms: (duration ?? 0) * 1000,
-        user_id: currentUserId,
-        guest_id: guestId || null,
-      });
+      // Insert into recordings_meta (optional, continue even if fails)
+      try {
+        await supaMain.from("recordings_meta").insert({
+          file_path: data.path,
+          mime_type: blob.type || "audio/webm",
+          size_bytes: blob.size ?? 0,
+          preset: selectedPreset || null,
+          duration_ms: (duration ?? 0) * 1000,
+          user_id: currentUserId,
+          guest_id: guestId || null,
+        });
+        console.log("[DB] recordings_meta saved successfully");
+      } catch (metaError) {
+        console.warn("[DB] Failed to save recordings_meta:", metaError);
+        // Continue anyway - main recording is saved
+      }
 
       // keep existing onStack, but include cloud info:
       await onStack?.(
@@ -292,18 +309,20 @@ export default function CheerModal({
       );
 
       // 성공 메시지 표시
-      setErr("Recording saved to My Stack!");
+      console.log("[Upload] Complete! File saved to:", data.path);
+      setErr(`✅ Recording saved! Path: ${data.path}`);
 
-      // 1초 후 모달 닫기
+      // 2초 후 모달 닫기
       setTimeout(() => {
         cleanupMedia();
         onClose?.();
-      }, 1000);
+      }, 2000);
 
     } catch (e) {
-      console.error(e);
+      console.error("[Upload] Full error:", e);
       const msg = e?.message || e?.error?.message || JSON.stringify(e);
-      setErr(`Upload/Save error: ${msg}`);
+      setErr(`❌ Upload failed: ${msg}. Please check browser console for details.`);
+      // Don't close modal on error so user can retry
     } finally {
       setSaving(false);
     }
@@ -342,7 +361,7 @@ export default function CheerModal({
 
         {err && (
           <div className={`mb-3 rounded-lg border px-3 py-2 text-sm ${
-            err.includes("saved to My Stack")
+            err.includes("saved") || err.includes("✅") || err.includes("Success")
               ? "border-green-500/30 bg-green-500/10 text-green-200"
               : "border-red-500/30 bg-red-500/10 text-red-200"
           }`}>
@@ -371,7 +390,7 @@ export default function CheerModal({
                 onClick={() => setSelectedPreset("yc")}
                 className={`rounded-xl px-4 py-2 ${
                   selectedPreset === "yc"
-                    ? "bg-pink-500 text-white"
+                    ? "bg-gradient-to-r from-purple-500 to-pink-500 text-white"
                     : "border border-white/20 text-neutral-200 hover:bg-white/10"
                 }`}
               >
@@ -381,7 +400,7 @@ export default function CheerModal({
                 onClick={() => setSelectedPreset("bts")}
                 className={`rounded-xl px-4 py-2 ${
                   selectedPreset === "bts"
-                    ? "bg-pink-500 text-white"
+                    ? "bg-gradient-to-r from-purple-500 to-pink-500 text-white"
                     : "border border-white/20 text-neutral-200 hover:bg-white/10"
                 }`}
               >
@@ -391,7 +410,7 @@ export default function CheerModal({
                 onClick={() => setSelectedPreset("lord")}
                 className={`rounded-xl px-4 py-2 ${
                   selectedPreset === "lord"
-                    ? "bg-pink-500 text-white"
+                    ? "bg-gradient-to-r from-purple-500 to-pink-500 text-white"
                     : "border border-white/20 text-neutral-200 hover:bg-white/10"
                 }`}
               >
@@ -401,7 +420,7 @@ export default function CheerModal({
                 onClick={() => setSelectedPreset("cando")}
                 className={`rounded-xl px-4 py-2 ${
                   selectedPreset === "cando"
-                    ? "bg-pink-500 text-white"
+                    ? "bg-gradient-to-r from-purple-500 to-pink-500 text-white"
                     : "border border-white/20 text-neutral-200 hover:bg-white/10"
                 }`}
               >
@@ -411,7 +430,7 @@ export default function CheerModal({
                 onClick={() => setSelectedPreset("earth")}
                 className={`rounded-xl px-4 py-2 ${
                   selectedPreset === "earth"
-                    ? "bg-pink-500 text-white"
+                    ? "bg-gradient-to-r from-purple-500 to-pink-500 text-white"
                     : "border border-white/20 text-neutral-200 hover:bg-white/10"
                 }`}
               >
@@ -475,7 +494,7 @@ export default function CheerModal({
                   disabled={!selectedPreset}
                   className={`rounded-xl px-4 py-2 w-full ${
                     selectedPreset
-                      ? "bg-pink-500 text-white hover:bg-pink-600"
+                      ? "bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white"
                       : "bg-neutral-700 text-neutral-400 cursor-not-allowed"
                   }`}
                 >
@@ -493,7 +512,7 @@ export default function CheerModal({
                         className={`w-full rounded-xl px-4 py-2.5 font-medium ${
                           saving
                             ? "bg-neutral-600 text-neutral-300 cursor-not-allowed"
-                            : "bg-pink-500 text-white hover:bg-pink-600"
+                            : "bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white"
                         }`}
                       >
                         {saving ? "Saving..." : "🚀 Send & Stack"}
@@ -584,7 +603,7 @@ export default function CheerModal({
                   // Continue with upload now that consent is granted
                   handleSendAndStack(true);
                 }}
-                className="rounded-lg bg-pink-500 px-4 py-1.5 text-sm text-white hover:bg-pink-600"
+                className="rounded-lg bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 px-4 py-1.5 text-sm text-white"
               >
                 I Agree & Send
               </button>

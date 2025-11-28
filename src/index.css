@@ -1,0 +1,85 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Light */
+:root{
+  --background: 0 0% 100%;
+  --foreground: 222.2 47.4% 11.2%;
+  --card: 0 0% 100%;
+  --card-foreground: 222.2 47.4% 11.2%;
+  --border: 214.3 31.8% 91.4%;
+}
+/* Dark */
+.dark{
+  --background: 222.2 84% 4.9%;
+  --foreground: 210 40% 98%;
+  --card: 222.2 84% 4.9%;
+  --card-foreground: 210 40% 98%;
+  --border: 217.2 32.6% 17.5%;
+}
+
+/* Tailwind base 적용 */
+@layer base{
+  *{ @apply border-border; }
+  body{ @apply bg-background text-foreground; }
+}
+
+/* WorldStack Tower Animation */
+@keyframes stackUp {
+  0% {
+    transform: translateY(100px) translateZ(0) rotateX(90deg);
+    opacity: 0;
+  }
+  50% {
+    transform: translateY(-5px) translateZ(0) rotateX(0deg);
+  }
+  100% {
+    transform: translateY(0) translateZ(0) rotateX(0deg);
+    opacity: 1;
+  }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0) translateZ(0);
+  }
+  50% {
+    transform: translateY(-3px) translateZ(0);
+  }
+}
+
+/* 3D Tower Block */
+.tower-block {
+  transform-style: preserve-3d;
+  perspective: 1000px;
+}
+
+.tower-block::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 100%;
+  background: inherit;
+  transform: rotateX(-90deg);
+  transform-origin: top;
+  opacity: 0.3;
+}
+
+/* Word Study Success Animation */
+@keyframes fade-in-up {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up 0.3s ease-out;
+}

@@ -35,13 +35,13 @@ export default function VideoGalleryModal({ open, onClose, items = [] }) {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {items.map((v) => (
                 <div key={v.id} className="rounded-xl border border-border p-3 bg-background">
-                  <div className="aspect-video rounded-lg overflow-hidden bg-black">
+                  <div className="aspect-[9/16] rounded-lg overflow-hidden bg-black">
                     <video
                       key={v.src} // src가 바뀔 때 강제 리로드
                       controls
                       playsInline
                       preload="metadata"
-                      className="w-full h-full object-contain"
+                      className="w-full h-full object-cover"
                     >
                       {/* 브라우저가 코덱을 정확히 인식하도록 type 명시 */}
                       {v.src?.toLowerCase().endsWith(".mp4")  && (

@@ -370,15 +370,17 @@ export default function CheerModal({
         )}
 
         <div className="space-y-5">
-          {/* 영상 미리보기 */}
+          {/* 영상 미리보기 - 9:16 Shorts 형식 */}
           {item?.video && (
-            <div className="relative rounded-xl overflow-hidden border border-white/10 bg-black">
-              <video
-                ref={videoRef}
-                src={item.video}
-                controls
-                className="w-full max-h-[360px] object-cover"
-              />
+            <div className="relative rounded-xl overflow-hidden border border-white/10 bg-black flex justify-center">
+              <div className="w-full max-w-[400px] aspect-[9/16]">
+                <video
+                  ref={videoRef}
+                  src={item.video}
+                  controls
+                  className="w-full h-full object-cover"
+                />
+              </div>
             </div>
           )}
 

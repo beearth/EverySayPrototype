@@ -5,9 +5,9 @@ const translations = {
       step1: {
         title: "Welcome to SPACE STACK! 👋",
         content: {
-          0: "SPACE STACK is a voice-based emotional support platform.",
-          1: "People around the world record and share messages of encouragement,",
-          2: "building a global cheer culture together.",
+          0: "SPACE STACK transforms positive energy from Faith, Fandom, and Support into digital assets.",
+          1: "We digitize every 'Positive Choice' you make in real-time as a Stack.",
+          2: "Accumulated Stacks become powerful social proof for viral growth.",
         },
       },
       step2: {
@@ -84,9 +84,9 @@ const translations = {
       step1: {
         title: "SPACE STACK에 오신 것을 환영합니다! 👋",
         content: {
-          0: "SPACE STACK는 음성 기반 감정 지원 플랫폼입니다.",
-          1: "전 세계 사람들이 격려의 메시지를 녹음하고 공유하여",
-          2: "글로벌 응원 문화를 만들어갑니다.",
+          0: "SPACE STACK는 신앙, 팬덤, 후원의 긍정 에너지를 디지털 자산(Stack)으로 전환합니다.",
+          1: "당신의 모든 '긍정적 선택'은 실시간으로 기록되어 스택이 됩니다.",
+          2: "축적된 스택은 강력한 사회적 증거가 되어 세상을 변화시킵니다.",
         },
       },
       step2: {

@@ -45,6 +45,16 @@ const translations = {
           4: "💡 An alternative feature for those who find voice recording difficult!",
         },
       },
+      step6: {
+        title: "Word Study Mode 📚",
+        highlight: "Stack Positive Words",
+        content: {
+          0: "by dragging down!",
+          1: "Memorize words by changing their colors,",
+          2: "and stack positive words directly to WorldStack.",
+          3: "💡 Grow your vocabulary starting with positive words!",
+        },
+      },
       skip: "Skip",
       previous: "Previous",
       next: "Next",
@@ -112,6 +122,16 @@ const translations = {
           2: "음성 녹음 없이 바로",
           3: "WorldStack에 추가됩니다.",
           4: "💡 음성 녹음이 어려운 분들을 위한 대안 기능입니다!",
+        },
+      },
+      step6: {
+        title: "Word Study 모드 📚",
+        highlight: "긍정 단어 스택하기",
+        content: {
+          0: "기능이 추가되었습니다! (아래로 드래그)",
+          1: "단어의 색상을 바꾸며 암기 상태를 관리하고,",
+          2: "긍정 단어를 WorldStack에 바로 쌓아보세요.",
+          3: "💡 긍정적인 단어부터 어휘력을 키워보세요!",
         },
       },
       skip: "건너뛰기",

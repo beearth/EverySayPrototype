@@ -94,6 +94,26 @@ function getTutorialSteps() {
       ),
       icon: "✨",
     },
+    {
+      title: t("tutorial.step6.title", lang),
+      content: (
+        <div className="space-y-4">
+          <p className="text-neutral-400">
+            <span className="text-pink-500 font-semibold">{t("tutorial.step6.highlight", lang)}</span>{" "}
+            {t("tutorial.step6.content.0", lang)}
+          </p>
+          <p className="text-neutral-400">
+            {t("tutorial.step6.content.1", lang)}
+            <br />
+            {t("tutorial.step6.content.2", lang)}
+          </p>
+          <p className="text-sm text-neutral-500 mt-4">
+            {t("tutorial.step6.content.3", lang)}
+          </p>
+        </div>
+      ),
+      icon: "📚",
+    },
   ];
 }
 

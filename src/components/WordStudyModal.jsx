@@ -136,12 +136,12 @@ export default function WordStudyModal({ open, onClose, onStackComplete }) {
 
     const currentState = wordStates[word.id] || WORD_STATE.WHITE;
     const nextState = getNextState(currentState);
-    
+
     const newStates = { ...wordStates, [word.id]: nextState };
     setWordStates(newStates);
-    
+
     await saveWordState(word.id, nextState);
-    
+
     // Save to word book with state
     await saveToWordBook(word, nextState);
   };
@@ -151,15 +151,15 @@ export default function WordStudyModal({ open, onClose, onStackComplete }) {
       const db = await openWordDB();
       const tx = db.transaction(WORD_STORE, "readwrite");
       const store = tx.objectStore(WORD_STORE);
-      
+
       // Save word state (red, yellow, or green)
       // Only save if state is not white
       if (state !== WORD_STATE.WHITE) {
         await new Promise((resolve, reject) => {
-          const req = store.put({ 
-            wordId: word.id, 
-            state: state, 
-            updatedAt: Date.now() 
+          const req = store.put({
+            wordId: word.id,
+            state: state,
+            updatedAt: Date.now()
           });
           req.onsuccess = () => resolve();
           req.onerror = () => reject(req.error);
@@ -205,29 +205,29 @@ export default function WordStudyModal({ open, onClose, onStackComplete }) {
 
   const handleWordPressStart = (word, event) => {
     if (saving || showOptions) return;
-    
+
     const clientX = event.touches ? event.touches[0].clientX : event.clientX;
     const clientY = event.touches ? event.touches[0].clientY : event.clientY;
-    
+
     touchStartRef.current = { word, x: clientX, y: clientY };
     setSelectedDirection(null);
     selectedDirectionRef.current = null;
-    
+
     // 전역 이벤트 핸들러 생성
     const handleMove = (e) => {
       if (!showOptionsRef.current || !touchStartRef.current) return;
-      
+
       const moveX = e.touches ? e.touches[0].clientX : e.clientX;
       const moveY = e.touches ? e.touches[0].clientY : e.clientY;
-      
+
       const dx = moveX - touchStartRef.current.x;
       const dy = moveY - touchStartRef.current.y;
       const distance = Math.sqrt(dx * dx + dy * dy);
-      
+
       if (distance > 25) {
         const angle = Math.atan2(dy, dx) * (180 / Math.PI);
         let direction = null;
-        
+
         if (angle >= -45 && angle <= 45) {
           direction = "right";
         } else if (angle > 45 && angle <= 135) {
@@ -237,39 +237,39 @@ export default function WordStudyModal({ open, onClose, onStackComplete }) {
         } else if (angle > -135 && angle < -45) {
           direction = "top";
         }
-        
+
         setSelectedDirection(direction);
         selectedDirectionRef.current = direction;
       }
     };
-    
+
     const handleEnd = async (e) => {
       e.preventDefault();
       e.stopPropagation();
-      
+
       if (longPressTimerRef.current) {
         clearTimeout(longPressTimerRef.current);
         longPressTimerRef.current = null;
       }
-      
+
       document.removeEventListener('mousemove', handleMove);
       document.removeEventListener('mouseup', handleEnd);
       document.removeEventListener('touchmove', handleMove);
       document.removeEventListener('touchend', handleEnd);
-      
+
       const currentDirection = selectedDirectionRef.current;
       const currentWord = longPressWordRef.current;
       const currentShowOptions = showOptionsRef.current;
-      
+
       moveHandlerRef.current = null;
       endHandlerRef.current = null;
-      
-      console.log("[WordStudy] End event:", { 
-        showOptions: currentShowOptions, 
-        direction: currentDirection, 
-        word: currentWord 
+
+      console.log("[WordStudy] End event:", {
+        showOptions: currentShowOptions,
+        direction: currentDirection,
+        word: currentWord
       });
-      
+
       // 약간의 지연을 두고 실행 (state 업데이트 대기)
       setTimeout(async () => {
         if (currentShowOptions && currentDirection && currentWord) {
@@ -282,18 +282,18 @@ export default function WordStudyModal({ open, onClose, onStackComplete }) {
           setSelectedDirection(null);
         }
       }, 50);
-      
+
       touchStartRef.current = null;
     };
-    
+
     moveHandlerRef.current = handleMove;
     endHandlerRef.current = handleEnd;
-    
+
     document.addEventListener('mousemove', handleMove);
     document.addEventListener('mouseup', handleEnd);
     document.addEventListener('touchmove', handleMove, { passive: false });
     document.addEventListener('touchend', handleEnd);
-    
+
     longPressTimerRef.current = setTimeout(() => {
       setLongPressWord(word);
       longPressWordRef.current = word;
@@ -338,19 +338,19 @@ export default function WordStudyModal({ open, onClose, onStackComplete }) {
         // 스택하기
         console.log("[WordStudy] Adding to stack:", word.word);
         await addWordToStack(word);
-        
+
         // 성공 애니메이션 표시
         setSuccessAnimation({
           wordId: word.id,
           word: word.word,
           timestamp: Date.now()
         });
-        
+
         // 2초 후 애니메이션 제거
         setTimeout(() => {
           setSuccessAnimation(null);
         }, 2000);
-        
+
         setSaving(false);
       } else if (direction === "right") {
         // 우: 커스터마이징 (나중에 구현)
@@ -381,7 +381,7 @@ export default function WordStudyModal({ open, onClose, onStackComplete }) {
   const addWordToStack = async (word) => {
     try {
       const script = `I found a positive word: ${word.word}`;
-      
+
       // Create minimal audio blob
       const minimalAudioData = new Uint8Array([0x1a, 0x45, 0xdf, 0xa3]);
       const blob = new Blob([minimalAudioData], { type: "audio/webm" });
@@ -465,6 +465,7 @@ export default function WordStudyModal({ open, onClose, onStackComplete }) {
           <p>• Click a word to change color: White → Red → Yellow → Green</p>
           <p>• Hold for 0.5 seconds to see options</p>
           <p>• Red/Yellow: Unmemorized | Green: Memorized</p>
+          <p>• Stack positive words to WorldStack (Drag Down)</p>
         </div>
 
         {/* Word Grid */}
@@ -474,7 +475,7 @@ export default function WordStudyModal({ open, onClose, onStackComplete }) {
               const state = wordStates[word.id] || WORD_STATE.WHITE;
               const colorClass = getStateColor(state);
               const isSuccess = successAnimation?.wordId === word.id;
-              
+
               return (
                 <div key={word.id} className="relative aspect-square">
                   <button
@@ -492,14 +493,13 @@ export default function WordStudyModal({ open, onClose, onStackComplete }) {
                         handleWordClick(word);
                       }
                     }}
-                    className={`w-full h-full rounded-lg text-xs font-medium transition-all ${colorClass} ${
-                      saving ? "opacity-50 cursor-not-allowed" : "hover:scale-105 cursor-pointer"
-                    } select-none relative z-10 flex items-center justify-center ${isSuccess ? "ring-4 ring-green-400 ring-offset-2 scale-110" : ""}`}
+                    className={`w-full h-full rounded-lg text-xs font-medium transition-all ${colorClass} ${saving ? "opacity-50 cursor-not-allowed" : "hover:scale-105 cursor-pointer"
+                      } select-none relative z-10 flex items-center justify-center ${isSuccess ? "ring-4 ring-green-400 ring-offset-2 scale-110" : ""}`}
                     title={`${word.word} - ${word.meaning}`}
                   >
                     <span className="truncate px-1 w-full text-center">{word.word}</span>
                   </button>
-                  
+
                   {/* Success Animation - Checkmark */}
                   {isSuccess && (
                     <div className="absolute inset-0 flex items-center justify-center z-20 pointer-events-none">
@@ -508,7 +508,7 @@ export default function WordStudyModal({ open, onClose, onStackComplete }) {
                       </div>
                     </div>
                   )}
-                  
+
                   {/* Success Message Overlay */}
                   {isSuccess && (
                     <div className="absolute -top-8 left-1/2 -translate-x-1/2 z-30 pointer-events-none animate-fade-in-up">
@@ -545,44 +545,40 @@ export default function WordStudyModal({ open, onClose, onStackComplete }) {
               <div className="relative w-32 h-32 pointer-events-auto">
                 {/* Top: Pronunciation */}
                 <div
-                  className={`absolute top-0 left-1/2 -translate-x-1/2 w-12 h-12 rounded-full ${
-                    selectedDirection === "top"
+                  className={`absolute top-0 left-1/2 -translate-x-1/2 w-12 h-12 rounded-full ${selectedDirection === "top"
                       ? "bg-blue-600 ring-4 ring-blue-300 scale-110"
                       : "bg-blue-500"
-                  } text-white flex items-center justify-center shadow-lg text-lg transition-all`}
+                    } text-white flex items-center justify-center shadow-lg text-lg transition-all`}
                 >
                   🔊
                 </div>
 
                 {/* Bottom: Stack */}
                 <div
-                  className={`absolute bottom-0 left-1/2 -translate-x-1/2 w-12 h-12 rounded-full ${
-                    selectedDirection === "bottom"
+                  className={`absolute bottom-0 left-1/2 -translate-x-1/2 w-12 h-12 rounded-full ${selectedDirection === "bottom"
                       ? "bg-pink-600 ring-4 ring-pink-300 scale-110"
                       : "bg-gradient-to-r from-purple-500 to-pink-500"
-                  } text-white flex items-center justify-center shadow-lg text-lg transition-all`}
+                    } text-white flex items-center justify-center shadow-lg text-lg transition-all`}
                 >
                   ⬆️
                 </div>
 
                 {/* Right: Custom (우) */}
                 <div
-                  className={`absolute right-0 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full ${
-                    selectedDirection === "right"
+                  className={`absolute right-0 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full ${selectedDirection === "right"
                       ? "bg-green-600 ring-4 ring-green-300 scale-110"
                       : "bg-green-500"
-                  } text-white flex items-center justify-center shadow-lg text-lg transition-all`}
+                    } text-white flex items-center justify-center shadow-lg text-lg transition-all`}
                 >
                   →
                 </div>
 
                 {/* Left: Custom (좌) */}
                 <div
-                  className={`absolute left-0 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full ${
-                    selectedDirection === "left"
+                  className={`absolute left-0 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full ${selectedDirection === "left"
                       ? "bg-gray-600 ring-4 ring-gray-300 scale-110"
                       : "bg-gray-500"
-                  } text-white flex items-center justify-center shadow-lg text-lg transition-all`}
+                    } text-white flex items-center justify-center shadow-lg text-lg transition-all`}
                 >
                   ←
                 </div>

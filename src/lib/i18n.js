@@ -13,10 +13,10 @@ const translations = {
       step2: {
         title: "Understanding WorldStack 🗼",
         content: {
-          0: "The WorldStack at the top shows the total number of voices",
-          1: "recorded by users worldwide.",
-          2: "Each voice stacks like a tower block,",
-          3: "creating a warmer world together.",
+          0: "WorldStack captures 3 Core Expressions (Faith/Fandom/Support),",
+          1: "Positive Word Stacks, and even your Drawings.",
+          2: "Beyond simple recordings, every positive choice",
+          3: "stacks up like a block to inspire the world.",
         },
       },
       step3: {
@@ -92,10 +92,10 @@ const translations = {
       step2: {
         title: "WorldStack 알아보기 🗼",
         content: {
-          0: "상단의 WorldStack은",
-          1: "전 세계 사용자들이 녹음한 음성의 총 개수를 보여줍니다.",
-          2: "각 음성은 타워의 블록처럼 쌓여가며,",
-          3: "함께 세상을 더 따뜻하게 만들어갑니다.",
+          0: "WorldStack은 3대 긍정 표현(신앙/팬덤/후원)부터,",
+          1: "긍정 단어 학습, 그리고 나만의 드로잉까지 모두 스택합니다.",
+          2: "단순한 기록을 넘어, 당신의 모든 긍정적 선택이",
+          3: "블록처럼 쌓여 세상에 영감을 줍니다.",
         },
       },
       step3: {

@@ -215,15 +215,12 @@ export default function MentorList({ guestId }) {
         let targetCount;
         let fillerCount = 0;
 
-        if (actualTotal >= DEMO_MIN_WORLDSTACK) {
-          targetCount = actualTotal;
-        } else {
-          targetCount = Math.max(
-            DEMO_MIN_WORLDSTACK,
-            actualTotal + DEMO_BASELINE_OFFSET
-          );
-          fillerCount = targetCount - finalSorted.length;
-        }
+        // Always apply the offset to avoid a sudden drop when crossing the threshold
+        targetCount = Math.max(
+          DEMO_MIN_WORLDSTACK,
+          actualTotal + DEMO_BASELINE_OFFSET
+        );
+        fillerCount = Math.max(0, targetCount - finalSorted.length);
 
         const demoFilled =
           fillerCount > 0 ? withDemoFill(finalSorted, fillerCount) : finalSorted;
@@ -238,15 +235,11 @@ export default function MentorList({ guestId }) {
       let targetFallback;
       let fillerFallback = 0;
 
-      if (actualFallback >= DEMO_MIN_WORLDSTACK) {
-        targetFallback = actualFallback;
-      } else {
-        targetFallback = Math.max(
-          DEMO_MIN_WORLDSTACK,
-          actualFallback + DEMO_BASELINE_OFFSET
-        );
-        fillerFallback = targetFallback - sortedLocal.length;
-      }
+      targetFallback = Math.max(
+        DEMO_MIN_WORLDSTACK,
+        actualFallback + DEMO_BASELINE_OFFSET
+      );
+      fillerFallback = Math.max(0, targetFallback - sortedLocal.length);
       console.log("[Load] Fallback - Local count:", localCount, "Target:", targetFallback);
 
       const demoFilledFallback =
@@ -260,15 +253,11 @@ export default function MentorList({ guestId }) {
       let targetFallback;
       let fillerFallback = 0;
 
-      if (actualFallback >= DEMO_MIN_WORLDSTACK) {
-        targetFallback = actualFallback;
-      } else {
-        targetFallback = Math.max(
-          DEMO_MIN_WORLDSTACK,
-          actualFallback + DEMO_BASELINE_OFFSET
-        );
-        fillerFallback = targetFallback - sortedLocal.length;
-      }
+      targetFallback = Math.max(
+        DEMO_MIN_WORLDSTACK,
+        actualFallback + DEMO_BASELINE_OFFSET
+      );
+      fillerFallback = Math.max(0, targetFallback - sortedLocal.length);
       console.log("[Load] Error fallback - Local count:", localCount, "Target:", targetFallback);
 
       const demoFilledFallback =
@@ -445,17 +434,15 @@ export default function MentorList({ guestId }) {
                           >
                             {/* Front Face with Script Text */}
                             <div
-                              className={`absolute inset-0 rounded-t-lg shadow-xl border border-white/10 flex items-center justify-center ${
-                                isNew
-                                  ? "ring-2 ring-pink-300 ring-offset-2"
-                                  : ""
-                              }`}
+                              className={`absolute inset-0 rounded-t-lg shadow-xl border border-white/10 flex items-center justify-center ${isNew
+                                ? "ring-2 ring-pink-300 ring-offset-2"
+                                : ""
+                                }`}
                               style={{
                                 background: `linear-gradient(to bottom, ${colorSet.from}, ${colorSet.via}, ${colorSet.to})`,
                                 transform: `translateZ(${depth / 2}px)`,
-                                boxShadow: `0 ${depth}px ${
-                                  depth * 2
-                                }px rgba(0,0,0,${shadowIntensity})`,
+                                boxShadow: `0 ${depth}px ${depth * 2
+                                  }px rgba(0,0,0,${shadowIntensity})`,
                               }}
                             >
                               {/* Script Text */}

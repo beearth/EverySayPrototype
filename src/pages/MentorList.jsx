@@ -5,6 +5,7 @@ import CheerModal from "../components/CheerModal";
 import VideoGalleryModal from "../components/VideoGalleryModal";
 import PositiveChoiceModal from "../components/PositiveChoiceModal";
 import WordStudyModal from "../components/WordStudyModal";
+import DrawingModal from "../components/DrawingModal";
 import LanguageSelector from "../components/LanguageSelector";
 import MyStackFeed, {
   addToStack,
@@ -95,6 +96,7 @@ export default function MentorList({ guestId }) {
   const [cheerItem, setCheerItem] = useState(null);
   const [positiveChoiceOpen, setPositiveChoiceOpen] = useState(false);
   const [wordStudyOpen, setWordStudyOpen] = useState(false);
+  const [drawingOpen, setDrawingOpen] = useState(false);
 
   /* Stack refresh trigger */
   const [stackRefresh, setStackRefresh] = useState(0);
@@ -504,6 +506,12 @@ export default function MentorList({ guestId }) {
                 📚 Word Study
               </button>
               <button
+                onClick={() => setDrawingOpen(true)}
+                className="px-3 py-1.5 rounded-xl bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-medium shadow-sm"
+              >
+                🎨 Drawing
+              </button>
+              <button
                 onClick={() => setPositiveChoiceOpen(true)}
                 className="px-3 py-1.5 rounded-xl bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-medium shadow-sm"
               >
@@ -652,6 +660,14 @@ export default function MentorList({ guestId }) {
       <WordStudyModal
         open={wordStudyOpen}
         onClose={() => setWordStudyOpen(false)}
+        onStackComplete={() => {
+          setStackRefresh((prev) => prev + 1);
+        }}
+      />
+
+      <DrawingModal
+        open={drawingOpen}
+        onClose={() => setDrawingOpen(false)}
         onStackComplete={() => {
           setStackRefresh((prev) => prev + 1);
         }}

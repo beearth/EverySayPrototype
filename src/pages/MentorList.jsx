@@ -351,10 +351,10 @@ export default function MentorList({ guestId }) {
         {/* HERO */}
         <header className="mb-6">
           {/* WorldStack - Total Voice Count with Visual Tower */}
-          <div className="mb-6 rounded-2xl border border-pink-500/30 bg-gradient-to-br from-pink-500/10 to-purple-500/10 p-6">
-            <div className="flex items-center justify-between gap-6">
+          <div className="mb-6 rounded-2xl border border-pink-500/30 bg-gradient-to-br from-pink-500/10 to-purple-500/10 p-6 overflow-hidden relative">
+            <div className="flex flex-col md:flex-row items-center justify-between gap-6 z-10 relative">
               {/* Left: 3D Tower Visualization */}
-              <div className="flex-1 flex items-end justify-center gap-2 h-56 min-h-[224px] relative">
+              <div className="flex-1 w-full flex items-end justify-center gap-2 h-56 min-h-[224px] relative">
                 {stackItems.length === 0 ? (
                   <div className="text-sm text-neutral-500 italic absolute bottom-0">
                     Start building the tower...

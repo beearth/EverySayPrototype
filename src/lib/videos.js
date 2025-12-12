@@ -2,128 +2,149 @@
 export const videos = [
   {
     "id": "v01",
-    "title": "SPACE STACK Demo 01",
+    "title": "Concert Energy",
     "tag": "Prototype",
-    "src": "/videos/1.mp4"
+    "src": "/videos/1.mp4",
+    "cheer": "Enjoy this moment forever!"
   },
   {
     "id": "v02",
-    "title": "SPACE STACK Demo 02",
+    "title": "Warm Sunset",
     "tag": "Prototype",
-    "src": "/videos/10.mp4"
+    "src": "/videos/10.mp4",
+    "cheer": "A peaceful evening, comforting you."
   },
   {
     "id": "v03",
-    "title": "SPACE STACK Demo 03",
+    "title": "Robotic Companion",
     "tag": "Prototype",
-    "src": "/videos/11.mp4"
+    "src": "/videos/11.mp4",
+    "cheer": "Technology warms the heart."
   },
   {
     "id": "v04",
-    "title": "SPACE STACK Demo 04",
+    "title": "Sunset Drive",
     "tag": "Prototype",
-    "src": "/videos/12.mp4"
+    "src": "/videos/12.mp4",
+    "cheer": "Drive towards your dreams."
   },
   {
     "id": "v05",
-    "title": "SPACE STACK Demo 05",
+    "title": "Surfing Waves",
     "tag": "Prototype",
-    "src": "/videos/13.mp4"
+    "src": "/videos/13.mp4",
+    "cheer": "Ride the waves of challenge boldly!"
   },
   {
     "id": "v06",
-    "title": "SPACE STACK Demo 06",
+    "title": "Night City",
     "tag": "Prototype",
-    "src": "/videos/14.mp4"
+    "src": "/videos/14.mp4",
+    "cheer": "You shine brighter than the city lights."
   },
   {
     "id": "v07",
-    "title": "SPACE STACK Demo 07",
+    "title": "Dog Kisses",
     "tag": "Demo",
-    "src": "/videos/15.mp4"
+    "src": "/videos/15.mp4",
+    "cheer": "Pure love heals everything."
   },
   {
     "id": "v08",
-    "title": "SPACE STACK Demo 08",
+    "title": "Birthday Wishes",
     "tag": "Demo",
-    "src": "/videos/16.mp4"
+    "src": "/videos/16.mp4",
+    "cheer": "Celebrate your existence everyday."
   },
   {
     "id": "v09",
-    "title": "SPACE STACK Demo 09",
+    "title": "Child Drawing",
     "tag": "Demo",
-    "src": "/videos/17.mp4"
+    "src": "/videos/17.mp4",
+    "cheer": "Creativity starts with a small dot."
   },
   {
     "id": "v10",
-    "title": "SPACE STACK Demo 10",
+    "title": "Winning Moment",
     "tag": "Demo",
-    "src": "/videos/18.mp4"
+    "src": "/videos/18.mp4",
+    "cheer": "Victory belongs to those who believe."
   },
   {
     "id": "v11",
-    "title": "SPACE STACK Demo 11",
+    "title": "Device Connection",
     "tag": "Demo",
-    "src": "/videos/19.mp4"
+    "src": "/videos/19.mp4",
+    "cheer": "Connect with the world, connect with hearts."
   },
   {
     "id": "v12",
-    "title": "SPACE STACK Demo 12",
+    "title": "Night View",
     "tag": "Demo",
-    "src": "/videos/2.mp4"
+    "src": "/videos/2.mp4",
+    "cheer": "The world is beautiful because you are in it."
   },
   {
     "id": "v13",
-    "title": "SPACE STACK Demo 13",
+    "title": "Study Time",
     "tag": "Demo",
-    "src": "/videos/20.mp4"
+    "src": "/videos/20.mp4",
+    "cheer": "Your efforts today will build your tomorrow."
   },
   {
     "id": "v14",
-    "title": "SPACE STACK Demo 14",
+    "title": "Selfie Smile",
     "tag": "Demo",
-    "src": "/videos/21.mp4"
+    "src": "/videos/21.mp4",
+    "cheer": "Your smile makes the world brighter."
   },
   {
     "id": "v15",
-    "title": "SPACE STACK Demo 15",
+    "title": "Cheering Crowd",
     "tag": "Demo",
-    "src": "/videos/3.mp4"
+    "src": "/videos/3.mp4",
+    "cheer": "We are cheering for you always!"
   },
   {
     "id": "v16",
-    "title": "SPACE STACK Demo 16",
+    "title": "Driving Fast",
     "tag": "Demo",
-    "src": "/videos/4.mp4"
+    "src": "/videos/4.mp4",
+    "cheer": "Speed up towards your goal!"
   },
   {
     "id": "v17",
-    "title": "SPACE STACK Demo 17",
+    "title": "Cross Symbol",
     "tag": "Demo",
-    "src": "/videos/5.mp4"
+    "src": "/videos/5.mp4",
+    "cheer": "Faith moves mountains."
   },
   {
     "id": "v18",
-    "title": "SPACE STACK Demo 18",
+    "title": "Coffee Break",
     "tag": "Demo",
-    "src": "/videos/6.mp4"
+    "src": "/videos/6.mp4",
+    "cheer": "Take a break, you deserve it."
   },
   {
     "id": "v19",
-    "title": "SPACE STACK Demo 19",
+    "title": "Global Network",
     "tag": "Demo",
-    "src": "/videos/7.mp4"
+    "src": "/videos/7.mp4",
+    "cheer": "We are all connected as one."
   },
   {
     "id": "v20",
-    "title": "SPACE STACK Demo 20",
+    "title": "Listening Child",
     "tag": "Demo",
-    "src": "/videos/8.mp4"
+    "src": "/videos/8.mp4",
+    "cheer": "Listen to the future within you."
   },
   {
     "id": "v21",
-    "title": "SPACE STACK Demo 21",
+    "title": "Playing Time",
     "tag": "Demo",
-    "src": "/videos/9.mp4"
+    "src": "/videos/9.mp4",
+    "cheer": "Joy is the greatest energy."
   }
 ];

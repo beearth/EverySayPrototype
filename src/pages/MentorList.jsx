@@ -114,7 +114,7 @@ export default function MentorList({ guestId }) {
       subtitle: i % 2 === 0 ? "Community support" : "Global fandom support",
       video: v.src,
       image: v.image, // if you ever add thumbnails in videos.js
-      cheer: "Add your voice. One word can lift a million hearts.",
+      cheer: v.cheer || "Add your voice. One word can lift a million hearts.",
     }));
   }, []);
 

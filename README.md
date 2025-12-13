@@ -11,3 +11,6 @@ and transform emotional voice data into global cheer culture.
 
 👉 Live Demo: https://every-say-prototype.vercel.app  
 👉 Repository: https://github.com/beearth/EverySayPrototype
+
+## Deployment Status
+- **Vercel**: ✅ Live & Automated

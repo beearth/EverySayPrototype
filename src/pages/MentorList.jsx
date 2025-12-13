@@ -352,9 +352,9 @@ export default function MentorList({ guestId }) {
       <header className="mb-6">
         {/* WorldStack - Total Voice Count with Visual Tower */}
         <div className="mb-6 rounded-2xl border border-pink-500/30 bg-gradient-to-br from-pink-500/10 to-purple-500/10 p-4 md:p-6 overflow-hidden relative">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-6 z-10 relative">
+          <div className="flex flex-col-reverse md:flex-row items-center justify-between gap-6 z-10 relative">
             {/* Left: 3D Tower Visualization */}
-            <div className="w-full md:flex-1 flex items-end justify-center gap-2 h-56 min-h-[224px] relative min-w-[220px]">
+            <div className="w-full md:flex-1 flex items-end justify-center gap-2 h-56 min-h-[224px] relative min-w-[220px] overflow-hidden">
               {stackItems.length === 0 ? (
                 <div className="text-sm text-neutral-500 italic absolute bottom-0">
                   Start building the tower...
@@ -565,6 +565,7 @@ export default function MentorList({ guestId }) {
                     src={c.video}
                     muted
                     playsInline
+                    controls
                     preload="metadata"
                     className="w-full h-full object-cover"
                     onMouseEnter={(e) => e.currentTarget.play()}

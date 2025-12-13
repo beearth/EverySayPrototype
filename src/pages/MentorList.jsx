@@ -115,6 +115,7 @@ export default function MentorList({ guestId }) {
       video: v.src,
       image: v.image, // if you ever add thumbnails in videos.js
       cheer: v.cheer || "Add your voice. One word can lift a million hearts.",
+      cheerScript: v.cheerScript,
     }));
   }, []);
 

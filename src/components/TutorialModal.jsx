@@ -8,10 +8,10 @@ function getTutorialSteps() {
       title: t("tutorial.step1.title", lang),
       content: (
         <div className="space-y-4">
-          <p className="text-neutral-400">
+          <p className="text-neutral-300">
             {t("tutorial.step1.content.0", lang)}
           </p>
-          <p className="text-neutral-400">
+          <p className="text-neutral-300">
             {t("tutorial.step1.content.1", lang)}
             <br />
             {t("tutorial.step1.content.2", lang)}
@@ -24,12 +24,12 @@ function getTutorialSteps() {
       title: t("tutorial.step2.title", lang),
       content: (
         <div className="space-y-4">
-          <p className="text-neutral-400">
+          <p className="text-neutral-300">
             {t("tutorial.step2.content.0", lang)}{" "}
             <span className="text-pink-500 font-semibold">WorldStack</span>{" "}
             {t("tutorial.step2.content.1", lang)}
           </p>
-          <p className="text-neutral-400">
+          <p className="text-neutral-300">
             {t("tutorial.step2.content.2", lang)}
             <br />
             {t("tutorial.step2.content.3", lang)}
@@ -42,11 +42,11 @@ function getTutorialSteps() {
       title: t("tutorial.step3.title", lang),
       content: (
         <div className="space-y-4">
-          <p className="text-neutral-400">
+          <p className="text-neutral-300">
             <span className="text-pink-500 font-semibold">"Who to Cheer"</span>{" "}
             {t("tutorial.step3.content.0", lang)}
           </p>
-          <p className="text-neutral-400">
+          <p className="text-neutral-300">
             <span className="text-pink-500 font-semibold">"Cheer Now"</span>{" "}
             {t("tutorial.step3.content.1", lang)}
           </p>
@@ -58,10 +58,10 @@ function getTutorialSteps() {
       title: t("tutorial.step4.title", lang),
       content: (
         <div className="space-y-4">
-          <p className="text-neutral-400">
+          <p className="text-neutral-300">
             {t("tutorial.step4.content.0", lang)}
           </p>
-          <p className="text-neutral-400">
+          <p className="text-neutral-300">
             {t("tutorial.step4.content.1", lang)}
             <br />
             {t("tutorial.step4.content.2", lang)}
@@ -77,11 +77,11 @@ function getTutorialSteps() {
       title: t("tutorial.step5.title", lang),
       content: (
         <div className="space-y-4">
-          <p className="text-neutral-400">
+          <p className="text-neutral-300">
             <span className="text-pink-500 font-semibold">"✨ Positive Choice"</span>{" "}
             {t("tutorial.step5.content.0", lang)}
           </p>
-          <p className="text-neutral-400">
+          <p className="text-neutral-300">
             {t("tutorial.step5.content.1", lang)}
             <br />
             <span className="text-pink-500 font-semibold">{t("tutorial.step5.content.2", lang)}</span>{" "}
@@ -98,11 +98,11 @@ function getTutorialSteps() {
       title: t("tutorial.step6.title", lang),
       content: (
         <div className="space-y-4">
-          <p className="text-neutral-400">
+          <p className="text-neutral-300">
             <span className="text-pink-500 font-semibold">{t("tutorial.step6.highlight", lang)}</span>{" "}
             {t("tutorial.step6.content.0", lang)}
           </p>
-          <p className="text-neutral-400">
+          <p className="text-neutral-300">
             {t("tutorial.step6.content.1", lang)}
             <br />
             {t("tutorial.step6.content.2", lang)}
@@ -118,16 +118,15 @@ function getTutorialSteps() {
       title: t("tutorial.step7.title", lang),
       content: (
         <div className="space-y-4">
-          <p className="text-neutral-400">
+          <p className="text-neutral-300">
             <span className="text-pink-500 font-semibold">{t("tutorial.step7.highlight", lang)}</span>{" "}
             {t("tutorial.step7.content.0", lang)}
           </p>
-          <p className="text-neutral-400">
+          <p className="text-neutral-300">
             {t("tutorial.step7.content.1", lang)}
             <br />
             {t("tutorial.step7.content.2", lang)}
-          </p>
-          <p className="text-sm text-neutral-500 mt-4">
+            <br />
             {t("tutorial.step7.content.3", lang)}
           </p>
         </div>

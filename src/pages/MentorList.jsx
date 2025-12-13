@@ -562,11 +562,11 @@ export default function MentorList({ guestId }) {
                 {c.video ? (
                   <video
                     key={c.video}
-                    src={c.video}
+                    src={`${c.video}#t=0.001`}
                     muted
                     playsInline
                     controls
-                    preload="metadata"
+                    preload="auto"
                     className="w-full h-full object-cover"
                     onMouseEnter={(e) => e.currentTarget.play()}
                     onMouseLeave={(e) => {

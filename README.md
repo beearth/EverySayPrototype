@@ -13,4 +13,5 @@ and transform emotional voice data into global cheer culture.
 👉 Repository: https://github.com/beearth/EverySayPrototype
 
 ## Deployment Status
-- **Vercel**: ✅ Live & Automated
+- **Vercel**: ✅ Live & Automated (Latest verified build v0.0.3)
+- **CI/CD**: Git Integration Active

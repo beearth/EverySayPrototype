@@ -31,7 +31,6 @@ export default function CheerModal({
   open,
   onClose,
   item,
-  onSend,
   onStack,
   session,
   guestId,
@@ -78,6 +77,7 @@ export default function CheerModal({
     if (!open) return;
     resetAll();
     return () => cleanupMedia();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
 
   function resetAll() {
@@ -105,7 +105,9 @@ export default function CheerModal({
       clearInterval(countdownRef.current);
       recorderRef.current?.state !== "inactive" && recorderRef.current?.stop();
       mediaStreamRef.current?.getTracks()?.forEach((t) => t.stop());
-    } catch { }
+    } catch {
+      // ignore
+    }
     recorderRef.current = null;
     mediaStreamRef.current = null;
   }
@@ -204,14 +206,6 @@ export default function CheerModal({
       console.error("[Consent] hasConsent error:", e);
       return false;
     }
-  }
-
-  function requestConsentOr(fn) {
-    if (hasConsent()) {
-      fn();
-      return;
-    }
-    setConsentOpen(true);
   }
 
   async function handleSendAndStack(bypassConsent = false) {
@@ -566,7 +560,9 @@ export default function CheerModal({
                         const until = Date.now() + THIRTY_DAYS;
                         window.localStorage.setItem("spacestack_consent_until", String(until));
                       }
-                    } catch { }
+                    } catch {
+                      // ignore
+                    }
                     setConsentOpen(false);
                     // Continue with upload now that consent is granted
                     handleSendAndStack(true);

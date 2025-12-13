@@ -1,7 +1,9 @@
+import tailwindAnimate from "tailwindcss-animate";
+
 /** @type {import('tailwindcss').Config} */
 export default {
-  darkMode: ["class"],                           // ← 이 줄이 핵심
-  content: ["./index.html","./src/**/*.{js,jsx}"],
+  darkMode: ["class"],
+  content: ["./index.html", "./src/**/*.{js,jsx}"],
   theme: {
     extend: {
       colors: {
@@ -12,5 +14,5 @@ export default {
       },
     },
   },
-  plugins: [require("tailwindcss-animate")],
+  plugins: [tailwindAnimate],
 }

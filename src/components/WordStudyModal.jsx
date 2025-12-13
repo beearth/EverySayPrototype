@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { WORD_STUDY_WORDS, WORD_STATE } from "../lib/wordStudy";
 import { addToStack } from "./MyStackFeed";
-import { getLanguage, t } from "../lib/i18n";
 import WordBookModal from "./WordBookModal";
 
 const DB_NAME = "spacestack";
@@ -22,19 +21,9 @@ async function openWordDB() {
   });
 }
 
-async function getWordState(wordId) {
-  try {
-    const db = await openWordDB();
-    return await new Promise((resolve, reject) => {
-      const tx = db.transaction(WORD_STORE, "readonly");
-      const req = tx.objectStore(WORD_STORE).get(wordId);
-      req.onsuccess = () => resolve(req.result?.state || WORD_STATE.WHITE);
-      req.onerror = () => reject(req.error);
-    });
-  } catch {
-    return WORD_STATE.WHITE;
-  }
-}
+// getWordState was unused, removing it as per lint (previous diff showed it being removed)
+// Wait, looking at Step 506 diff, getWordState WAS removed.
+// Original file Step 500 line 25.
 
 async function saveWordState(wordId, state) {
   try {
@@ -81,11 +70,14 @@ export default function WordStudyModal({ open, onClose, onStackComplete }) {
   const [successAnimation, setSuccessAnimation] = useState(null);
   const [wordBookOpen, setWordBookOpen] = useState(false);
   const [wordBookType, setWordBookType] = useState("red");
-  const lang = getLanguage();
+
+  // Unused lang variable removed
+  // const lang = getLanguage();
 
   const longPressTimerRef = useRef(null);
   const touchStartRef = useRef(null);
-  const touchCurrentRef = useRef(null);
+  // Unused ref removed
+  // const touchCurrentRef = useRef(null);
   const moveHandlerRef = useRef(null);
   const endHandlerRef = useRef(null);
   const showOptionsRef = useRef(false);
@@ -303,13 +295,7 @@ export default function WordStudyModal({ open, onClose, onStackComplete }) {
     }, 500);
   };
 
-  const handleWordPressMove = (event) => {
-    // 이 함수는 이제 사용하지 않음 (전역 리스너 사용)
-  };
-
-  const handleWordPressEnd = () => {
-    // 이 함수는 이제 사용하지 않음 (전역 리스너 사용)
-  };
+  // REMOVED: handleWordPressMove, handleWordPressEnd
 
   const handleOptionClick = async (direction) => {
     const word = longPressWordRef.current || longPressWord;
@@ -487,7 +473,7 @@ export default function WordStudyModal({ open, onClose, onStackComplete }) {
                       e.preventDefault();
                       handleWordPressStart(word, e);
                     }}
-                    onClick={(e) => {
+                    onClick={() => {
                       // 짧은 클릭만 처리 (홀딩이 아닌 경우)
                       if (!showOptions && !longPressTimerRef.current) {
                         handleWordClick(word);
@@ -546,8 +532,8 @@ export default function WordStudyModal({ open, onClose, onStackComplete }) {
                 {/* Top: Pronunciation */}
                 <div
                   className={`absolute top-0 left-1/2 -translate-x-1/2 w-12 h-12 rounded-full ${selectedDirection === "top"
-                      ? "bg-blue-600 ring-4 ring-blue-300 scale-110"
-                      : "bg-blue-500"
+                    ? "bg-blue-600 ring-4 ring-blue-300 scale-110"
+                    : "bg-blue-500"
                     } text-white flex items-center justify-center shadow-lg text-lg transition-all`}
                 >
                   🔊
@@ -556,8 +542,8 @@ export default function WordStudyModal({ open, onClose, onStackComplete }) {
                 {/* Bottom: Stack */}
                 <div
                   className={`absolute bottom-0 left-1/2 -translate-x-1/2 w-12 h-12 rounded-full ${selectedDirection === "bottom"
-                      ? "bg-pink-600 ring-4 ring-pink-300 scale-110"
-                      : "bg-gradient-to-r from-purple-500 to-pink-500"
+                    ? "bg-pink-600 ring-4 ring-pink-300 scale-110"
+                    : "bg-gradient-to-r from-purple-500 to-pink-500"
                     } text-white flex items-center justify-center shadow-lg text-lg transition-all`}
                 >
                   ⬆️
@@ -566,8 +552,8 @@ export default function WordStudyModal({ open, onClose, onStackComplete }) {
                 {/* Right: Custom (우) */}
                 <div
                   className={`absolute right-0 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full ${selectedDirection === "right"
-                      ? "bg-green-600 ring-4 ring-green-300 scale-110"
-                      : "bg-green-500"
+                    ? "bg-green-600 ring-4 ring-green-300 scale-110"
+                    : "bg-green-500"
                     } text-white flex items-center justify-center shadow-lg text-lg transition-all`}
                 >
                   →
@@ -576,8 +562,8 @@ export default function WordStudyModal({ open, onClose, onStackComplete }) {
                 {/* Left: Custom (좌) */}
                 <div
                   className={`absolute left-0 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full ${selectedDirection === "left"
-                      ? "bg-gray-600 ring-4 ring-gray-300 scale-110"
-                      : "bg-gray-500"
+                    ? "bg-gray-600 ring-4 ring-gray-300 scale-110"
+                    : "bg-gray-500"
                     } text-white flex items-center justify-center shadow-lg text-lg transition-all`}
                 >
                   ←
@@ -608,4 +594,3 @@ export default function WordStudyModal({ open, onClose, onStackComplete }) {
     </div>
   );
 }
-

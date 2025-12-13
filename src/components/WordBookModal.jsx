@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { WORD_STUDY_WORDS } from "../lib/wordStudy";
-import { getLanguage, t } from "../lib/i18n";
 
 const DB_NAME = "spacestack";
 const WORD_STORE = "wordStudy";
@@ -40,7 +39,6 @@ async function getWordsByState(state) {
 export default function WordBookModal({ open, onClose, bookType }) {
   const [words, setWords] = useState([]);
   const [loading, setLoading] = useState(true);
-  const lang = getLanguage();
 
   const bookConfig = {
     red: {
@@ -69,13 +67,14 @@ export default function WordBookModal({ open, onClose, bookType }) {
     if (open) {
       loadWords();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, bookType]);
 
   const loadWords = async () => {
     setLoading(true);
     try {
       const wordStates = await getWordsByState(config.state);
-      
+
       // Get full word data
       const fullWords = wordStates.map(item => {
         const wordData = WORD_STUDY_WORDS.find(w => w.id === item.wordId);
@@ -88,7 +87,7 @@ export default function WordBookModal({ open, onClose, bookType }) {
 
       // Sort by updatedAt (most recent first)
       fullWords.sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0));
-      
+
       setWords(fullWords);
     } catch (err) {
       console.error("[WordBook] Failed to load words:", err);
@@ -130,9 +129,9 @@ export default function WordBookModal({ open, onClose, bookType }) {
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
               {words.map((word) => {
                 const bgColor = config.color === "red" ? "bg-red-500/20 border-red-500/50" :
-                               config.color === "yellow" ? "bg-yellow-500/20 border-yellow-500/50" :
-                               "bg-green-500/20 border-green-500/50";
-                
+                  config.color === "yellow" ? "bg-yellow-500/20 border-yellow-500/50" :
+                    "bg-green-500/20 border-green-500/50";
+
                 return (
                   <div
                     key={word.id}

@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 // src/components/MyStackFeed.jsx
 import { useEffect, useState } from "react";
 
@@ -77,7 +78,7 @@ async function add(file, metadata) {
       cloudUrl: metadata.cloudUrl || null,
     };
     const stackReq = tx.objectStore(STORE).add(item);
-    
+
     // Increment total count ONLY if this is NOT a cloud-synced item
     // Cloud items are already counted in Supabase, so we don't double-count
     if (!metadata.cloudPath) {
@@ -88,7 +89,7 @@ async function add(file, metadata) {
         statsStore.put({ key: "totalCount", value: current + 1 });
       };
     }
-    
+
     stackReq.onsuccess = () => resolve(stackReq.result);
     stackReq.onerror = () => reject(stackReq.error);
   });

@@ -53,7 +53,7 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <div className="mx-auto max-w-6xl p-6">
+      <div className="mx-auto max-w-6xl p-3 md:p-6">
         <div className="mb-4 flex justify-end">
           <AuthButtons />
         </div>

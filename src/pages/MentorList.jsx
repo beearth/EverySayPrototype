@@ -347,283 +347,275 @@ export default function MentorList({ guestId }) {
   }, []);
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
-      <div className="mx-auto max-w-6xl p-6">
-        {/* HERO */}
-        <header className="mb-6">
-          {/* WorldStack - Total Voice Count with Visual Tower */}
-          <div className="mb-6 rounded-2xl border border-pink-500/30 bg-gradient-to-br from-pink-500/10 to-purple-500/10 p-6 overflow-hidden relative">
-            <div className="flex flex-col md:flex-row items-center justify-between gap-6 z-10 relative">
-              {/* Left: 3D Tower Visualization */}
-              <div className="flex-1 w-full flex items-end justify-center gap-2 h-56 min-h-[224px] relative">
-                {stackItems.length === 0 ? (
-                  <div className="text-sm text-neutral-500 italic absolute bottom-0">
-                    Start building the tower...
-                  </div>
-                ) : (
-                  <>
-                    {/* 3D Stacked Blocks with Scripts */}
-                    <div
-                      className="flex flex-col-reverse items-center gap-1"
-                      style={{ perspective: "1000px" }}
-                    >
-                      {stackItems.map((item, i) => {
-                        // Pyramid shape: bottom (i=0) is largest, top (i=max) is smallest
-                        // i increases from bottom to top, so we use i directly for level
-                        const level = Math.floor(i / 5);
-                        const height = 32 + level * 4; // Keep height reasonable
-                        // Pyramid: wider at bottom (i=0), narrower at top - make much wider for text
-                        const baseWidth = 200; // Much wider for full text display
-                        const width = baseWidth - level * 8; // Gradual narrowing
-                        const depth = 18 - level * 0.5; // Slightly reduced depth
-                        const delay = i * 0.015;
-                        const colorSets = [
-                          {
-                            from: "rgb(236, 72, 153)",
-                            via: "rgb(219, 39, 119)",
-                            to: "rgb(190, 24, 93)",
-                          },
-                          {
-                            from: "rgb(168, 85, 247)",
-                            via: "rgb(147, 51, 234)",
-                            to: "rgb(126, 34, 206)",
-                          },
-                          {
-                            from: "rgb(59, 130, 246)",
-                            via: "rgb(37, 99, 235)",
-                            to: "rgb(29, 78, 216)",
-                          },
-                          {
-                            from: "rgb(99, 102, 241)",
-                            via: "rgb(79, 70, 229)",
-                            to: "rgb(67, 56, 202)",
-                          },
-                          {
-                            from: "rgb(244, 63, 94)",
-                            via: "rgb(225, 29, 72)",
-                            to: "rgb(190, 18, 60)",
-                          },
-                          {
-                            from: "rgb(139, 92, 246)",
-                            via: "rgb(124, 58, 237)",
-                            to: "rgb(109, 40, 217)",
-                          },
-                          {
-                            from: "rgb(217, 70, 239)",
-                            via: "rgb(192, 38, 211)",
-                            to: "rgb(162, 28, 175)",
-                          },
-                        ];
-                        const colorSet = colorSets[i % colorSets.length];
-                        const isNew = i === 0 && stackItems.length > 0;
-                        const shadowIntensity = Math.max(0.3, 1 - i * 0.02);
-                        const script = item.title || "Recording";
-                        const fontSize = Math.max(14, 20 - level * 1.5); // 3x: 8*1.75, 12*1.67
+    <div className="w-full">
+      {/* HERO */}
+      <header className="mb-6">
+        {/* WorldStack - Total Voice Count with Visual Tower */}
+        <div className="mb-6 rounded-2xl border border-pink-500/30 bg-gradient-to-br from-pink-500/10 to-purple-500/10 p-4 md:p-6 overflow-hidden relative">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-6 z-10 relative">
+            {/* Left: 3D Tower Visualization */}
+            <div className="w-full md:flex-1 flex items-end justify-center gap-2 h-56 min-h-[224px] relative min-w-[220px]">
+              {stackItems.length === 0 ? (
+                <div className="text-sm text-neutral-500 italic absolute bottom-0">
+                  Start building the tower...
+                </div>
+              ) : (
+                <>
+                  {/* 3D Stacked Blocks with Scripts */}
+                  <div
+                    className="flex flex-col-reverse items-center gap-1"
+                    style={{ perspective: "1000px" }}
+                  >
+                    {stackItems.map((item, i) => {
+                      // Pyramid shape: bottom (i=0) is largest, top (i=max) is smallest
+                      // i increases from bottom to top, so we use i directly for level
+                      const level = Math.floor(i / 5);
+                      const height = 32 + level * 4; // Keep height reasonable
+                      // Pyramid: wider at bottom (i=0), narrower at top - make much wider for text
+                      const baseWidth = 200; // Much wider for full text display
+                      const width = baseWidth - level * 8; // Gradual narrowing
+                      const depth = 18 - level * 0.5; // Slightly reduced depth
+                      const delay = i * 0.015;
+                      const colorSets = [
+                        {
+                          from: "rgb(236, 72, 153)",
+                          via: "rgb(219, 39, 119)",
+                          to: "rgb(190, 24, 93)",
+                        },
+                        {
+                          from: "rgb(168, 85, 247)",
+                          via: "rgb(147, 51, 234)",
+                          to: "rgb(126, 34, 206)",
+                        },
+                        {
+                          from: "rgb(59, 130, 246)",
+                          via: "rgb(37, 99, 235)",
+                          to: "rgb(29, 78, 216)",
+                        },
+                        {
+                          from: "rgb(99, 102, 241)",
+                          via: "rgb(79, 70, 229)",
+                          to: "rgb(67, 56, 202)",
+                        },
+                        {
+                          from: "rgb(244, 63, 94)",
+                          via: "rgb(225, 29, 72)",
+                          to: "rgb(190, 18, 60)",
+                        },
+                        {
+                          from: "rgb(139, 92, 246)",
+                          via: "rgb(124, 58, 237)",
+                          to: "rgb(109, 40, 217)",
+                        },
+                        {
+                          from: "rgb(217, 70, 239)",
+                          via: "rgb(192, 38, 211)",
+                          to: "rgb(162, 28, 175)",
+                        },
+                      ];
+                      const colorSet = colorSets[i % colorSets.length];
+                      const isNew = i === 0 && stackItems.length > 0;
+                      const shadowIntensity = Math.max(0.3, 1 - i * 0.02);
+                      const script = item.title || "Recording";
+                      const fontSize = Math.max(14, 20 - level * 1.5); // 3x: 8*1.75, 12*1.67
 
-                        return (
+                      return (
+                        <div
+                          key={`block-${item.id || i}-${totalCount}`}
+                          className="tower-block relative"
+                          style={{
+                            width: `${width}px`,
+                            height: `${height}px`,
+                            animation: isNew
+                              ? "stackUp 0.6s ease-out, float 2s ease-in-out infinite 0.6s"
+                              : "stackUp 0.5s ease-out",
+                            animationDelay: `${delay}s`,
+                            animationFillMode: "both",
+                            transformStyle: "preserve-3d",
+                          }}
+                        >
+                          {/* Front Face with Script Text */}
                           <div
-                            key={`block-${item.id || i}-${totalCount}`}
-                            className="tower-block relative"
+                            className={`absolute inset-0 rounded-t-lg shadow-xl border border-white/10 flex items-center justify-center ${isNew
+                              ? "ring-2 ring-pink-300 ring-offset-2"
+                              : ""
+                              }`}
                             style={{
-                              width: `${width}px`,
-                              height: `${height}px`,
-                              animation: isNew
-                                ? "stackUp 0.6s ease-out, float 2s ease-in-out infinite 0.6s"
-                                : "stackUp 0.5s ease-out",
-                              animationDelay: `${delay}s`,
-                              animationFillMode: "both",
-                              transformStyle: "preserve-3d",
+                              background: `linear-gradient(to bottom, ${colorSet.from}, ${colorSet.via}, ${colorSet.to})`,
+                              transform: `translateZ(${depth / 2}px)`,
+                              boxShadow: `0 ${depth}px ${depth * 2
+                                }px rgba(0,0,0,${shadowIntensity})`,
                             }}
                           >
-                            {/* Front Face with Script Text */}
+                            {/* Script Text */}
                             <div
-                              className={`absolute inset-0 rounded-t-lg shadow-xl border border-white/10 flex items-center justify-center ${isNew
-                                ? "ring-2 ring-pink-300 ring-offset-2"
-                                : ""
-                                }`}
+                              className="text-white font-semibold text-center px-3 leading-tight"
                               style={{
-                                background: `linear-gradient(to bottom, ${colorSet.from}, ${colorSet.via}, ${colorSet.to})`,
-                                transform: `translateZ(${depth / 2}px)`,
-                                boxShadow: `0 ${depth}px ${depth * 2
-                                  }px rgba(0,0,0,${shadowIntensity})`,
+                                fontSize: `${fontSize}px`,
+                                textShadow: "0 2px 4px rgba(0,0,0,0.6)",
+                                maxWidth: "100%",
+                                overflow: "hidden",
+                                textOverflow: "ellipsis",
+                                whiteSpace: "nowrap",
                               }}
+                              title={script}
                             >
-                              {/* Script Text */}
-                              <div
-                                className="text-white font-semibold text-center px-3 leading-tight"
-                                style={{
-                                  fontSize: `${fontSize}px`,
-                                  textShadow: "0 2px 4px rgba(0,0,0,0.6)",
-                                  maxWidth: "100%",
-                                  overflow: "hidden",
-                                  textOverflow: "ellipsis",
-                                  whiteSpace: "nowrap",
-                                }}
-                                title={script}
-                              >
-                                {script.length > 40
-                                  ? script.substring(0, 40) + "..."
-                                  : script}
-                              </div>
+                              {script.length > 40
+                                ? script.substring(0, 40) + "..."
+                                : script}
                             </div>
-
-                            {/* Top Face - removed for cleaner look */}
-                            {/* Side Faces - removed to eliminate ghosting effect */}
                           </div>
-                        );
-                      })}
-                    </div>
-                  </>
+
+                          {/* Top Face - removed for cleaner look */}
+                          {/* Side Faces - removed to eliminate ghosting effect */}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </>
+              )}
+            </div>
+
+            {/* Right: Count Display */}
+            <div className="flex-1 text-center space-y-4">
+              <div>
+                <div className="text-2xl text-neutral-400 mb-2 font-medium">
+                  WorldStack
+                </div>
+                <div className="text-6xl font-bold text-pink-500 mb-1">
+                  {totalCount.toLocaleString()}
+                </div>
+                <div className="text-xs text-neutral-500">
+                  Voices building together
+                </div>
+              </div>
+
+              <MyStackPoints session={session} refreshKey={stackRefresh} />
+            </div>
+          </div>
+        </div>
+
+        <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+          <h1 className="text-2xl font-bold">{TITLE}</h1>
+          <div className="flex flex-wrap items-center justify-center gap-2">
+            <LanguageSelector />
+            <button
+              onClick={() => setWordStudyOpen(true)}
+              className="px-3 py-1.5 rounded-xl bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-medium shadow-sm"
+            >
+              📚 Word Study
+            </button>
+            <button
+              onClick={() => setDrawingOpen(true)}
+              className="px-3 py-1.5 rounded-xl bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-medium shadow-sm"
+            >
+              🎨 Drawing
+            </button>
+            <button
+              onClick={() => setPositiveChoiceOpen(true)}
+              className="px-3 py-1.5 rounded-xl bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-medium shadow-sm"
+            >
+              ✨ Positive Choice
+            </button>
+            {/* Watch Videos button removed */}
+          </div>
+        </div>
+
+        {/* search + quick categories (UI only) */}
+        <div className="mt-4">
+          <input
+            placeholder={SEARCH_PH}
+            className="w-full p-3 rounded-xl border border-border bg-background"
+          />
+          <div className="mt-3 flex flex-wrap gap-2 text-xs">
+            {CATEGORIES.map((t) => (
+              <span
+                key={t}
+                className="px-3 py-1 rounded-full border border-border hover:bg-muted cursor-pointer"
+              >
+                {t}
+              </span>
+            ))}
+          </div>
+        </div>
+      </header>
+
+      {/* Mentors placeholder grid (your existing cards here) */}
+      <section className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+        {/* <MentorCard .../> */}
+      </section>
+
+      {/* WHO TO CHEER – fixed 12 cards */}
+      <section className="mt-6">
+        <div className="mb-3 flex items-center justify-between">
+          <h2 className="text-xl font-semibold">Who to Cheer</h2>
+        </div>
+
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3">
+          {cheerCards.map((c) => (
+            <div
+              key={c.id}
+              className="rounded-xl border border-border overflow-hidden bg-background"
+            >
+              {/* Media (video preferred, image fallback) */}
+              <div className="aspect-[5/4] bg-neutral-900 overflow-hidden">
+                {c.video ? (
+                  <video
+                    key={c.video}
+                    src={c.video}
+                    muted
+                    playsInline
+                    preload="metadata"
+                    className="w-full h-full object-cover"
+                    onMouseEnter={(e) => e.currentTarget.play()}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.pause();
+                      e.currentTarget.currentTime = 0;
+                    }}
+                  />
+                ) : c.image ? (
+                  <img
+                    src={c.image}
+                    alt={c.title}
+                    className="w-full h-full object-cover"
+                    loading="lazy"
+                  />
+                ) : (
+                  <div className="w-full h-full grid place-items-center text-neutral-500 text-xs">
+                    No media
+                  </div>
                 )}
               </div>
 
-              {/* Right: Count Display */}
-              <div className="flex-1 text-center space-y-4">
-                <div>
-                  <div className="text-2xl text-neutral-400 mb-2 font-medium">
-                    WorldStack
-                  </div>
-                  <div className="text-6xl font-bold text-pink-500 mb-1">
-                    {totalCount.toLocaleString()}
-                  </div>
-                  <div className="text-xs text-neutral-500">
-                    Voices building together
-                  </div>
-                </div>
+              <div className="p-2">
+                <h3 className="font-semibold text-sm leading-snug line-clamp-2">
+                  {c.title}
+                </h3>
+                {c.subtitle && (
+                  <p className="text-[11px] text-neutral-500">{c.subtitle}</p>
+                )}
+                {c.cheer && (
+                  <p className="mt-1 text-xs text-neutral-400 line-clamp-2">
+                    {c.cheer}
+                  </p>
+                )}
 
-                <MyStackPoints session={session} refreshKey={stackRefresh} />
-              </div>
-            </div>
-          </div>
-
-          <div className="flex items-center justify-between">
-            <h1 className="text-2xl font-bold">{TITLE}</h1>
-            <div className="flex gap-2 items-center">
-              <LanguageSelector />
-              <button
-                onClick={() => setWordStudyOpen(true)}
-                className="px-3 py-1.5 rounded-xl bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-medium shadow-sm"
-              >
-                📚 Word Study
-              </button>
-              <button
-                onClick={() => setDrawingOpen(true)}
-                className="px-3 py-1.5 rounded-xl bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-medium shadow-sm"
-              >
-                🎨 Drawing
-              </button>
-              <button
-                onClick={() => setPositiveChoiceOpen(true)}
-                className="px-3 py-1.5 rounded-xl bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-medium shadow-sm"
-              >
-                ✨ Positive Choice
-              </button>
-              <button
-                onClick={handleOpenVideos}
-                className="px-3 py-1.5 rounded-xl bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-medium shadow-sm"
-              >
-                🎬 Watch Videos
-              </button>
-            </div>
-          </div>
-
-          {/* search + quick categories (UI only) */}
-          <div className="mt-4">
-            <input
-              placeholder={SEARCH_PH}
-              className="w-full p-3 rounded-xl border border-border bg-background"
-            />
-            <div className="mt-3 flex flex-wrap gap-2 text-xs">
-              {CATEGORIES.map((t) => (
-                <span
-                  key={t}
-                  className="px-3 py-1 rounded-full border border-border hover:bg-muted cursor-pointer"
-                >
-                  {t}
-                </span>
-              ))}
-            </div>
-          </div>
-        </header>
-
-        {/* Mentors placeholder grid (your existing cards here) */}
-        <section className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
-          {/* <MentorCard .../> */}
-        </section>
-
-        {/* WHO TO CHEER – fixed 12 cards */}
-        <section className="mt-6">
-          <div className="mb-3 flex items-center justify-between">
-            <h2 className="text-xl font-semibold">Who to Cheer</h2>
-          </div>
-
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3">
-            {cheerCards.map((c) => (
-              <div
-                key={c.id}
-                className="rounded-xl border border-border overflow-hidden bg-background"
-              >
-                {/* Media (video preferred, image fallback) */}
-                <div className="aspect-[5/4] bg-neutral-900 overflow-hidden">
-                  {c.video ? (
-                    <video
-                      key={c.video}
-                      src={c.video}
-                      muted
-                      playsInline
-                      preload="metadata"
-                      className="w-full h-full object-cover"
-                      onMouseEnter={(e) => e.currentTarget.play()}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.pause();
-                        e.currentTarget.currentTime = 0;
-                      }}
-                    />
-                  ) : c.image ? (
-                    <img
-                      src={c.image}
-                      alt={c.title}
-                      className="w-full h-full object-cover"
-                      loading="lazy"
-                    />
-                  ) : (
-                    <div className="w-full h-full grid place-items-center text-neutral-500 text-xs">
-                      No media
-                    </div>
-                  )}
-                </div>
-
-                <div className="p-2">
-                  <h3 className="font-semibold text-sm leading-snug line-clamp-2">
-                    {c.title}
-                  </h3>
-                  {c.subtitle && (
-                    <p className="text-[11px] text-neutral-500">{c.subtitle}</p>
-                  )}
-                  {c.cheer && (
-                    <p className="mt-1 text-xs text-neutral-400 line-clamp-2">
-                      {c.cheer}
-                    </p>
-                  )}
-
-                  <div className="mt-2 flex items-center">
-                    <button
-                      onClick={() => {
-                        setCheerItem(c);
-                        setCheerOpen(true);
-                      }}
-                      className="ml-auto inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-[12px] font-medium text-white"
-                    >
-                      💗 Cheer Now
-                    </button>
-                  </div>
+                <div className="mt-2 flex items-center">
+                  <button
+                    onClick={() => {
+                      setCheerItem(c);
+                      setCheerOpen(true);
+                    }}
+                    className="ml-auto inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-[12px] font-medium text-white"
+                  >
+                    💗 Cheer Now
+                  </button>
                 </div>
               </div>
-            ))}
-          </div>
-        </section>
-      </div>
-
+            </div>
+          ))}
+        </div>
+      </section>
       {/* Local stack feed */}
       <MyStackFeed refreshTrigger={stackRefresh} />
 

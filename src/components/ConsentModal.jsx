@@ -11,11 +11,11 @@ export default function ConsentModal({ onAgree }) {
         rounded-3xl bg-background border border-border shadow-2xl p-8 sm:p-10 text-[16px] leading-relaxed"
       >
         <h2 className="text-2xl font-semibold text-center mb-6">
-          SPACE STACK Support Platform Prototype
+          Eternal Stack Support Platform Prototype
         </h2>
 
         <p className="text-neutral-500 mb-8 text-[15px] text-center sm:text-left leading-relaxed">
-          This is a <b>prototype version</b> of the SPACE STACK Support Platform.<br /><br />
+          This is a <b>prototype version</b> of the Eternal Stack Support Platform.<br /><br />
           Recorded voices will be used only for testing and internal service improvement and will be stored for up to <b>1 year (365 days)</b>.<br /><br />
           Recordings will never be <b>shared, sold, redistributed, or used externally</b> for any commercial purpose.<br /><br />
           If you withdraw consent, remaining stored data will be deleted upon request. (Note: data already incorporated into deployed models may not be retractable.)

@@ -16,7 +16,7 @@ import { supa } from "../lib/supa";
 import MyStackPoints from "../components/MyStackPoints";
 
 /* ───── 텍스트 한방 교체용 상수 ───── */
-const TITLE = "SPACE STACK Cheer Hub"; // ← 여기서 바꾸면 헤더 제목 변경
+const TITLE = "Eternal Stack Cheer Hub"; // ← 여기서 바꾸면 헤더 제목 변경
 const SEARCH_PH = "Search events";
 const CATEGORIES = [
   "Fandom",
@@ -43,7 +43,7 @@ function withDemoFill(items, fillerCount) {
     const createdAt = new Date(baseTime - (i + 1) * 1000).toISOString();
     filled.push({
       id: `demo-filler-${createdAt}-${i}`,
-      title: "SPACE STACK Demo Recording",
+      title: "Eternal Stack Demo Recording",
       createdAt,
       preset: "demo",
       duration: 5,
@@ -51,10 +51,12 @@ function withDemoFill(items, fillerCount) {
     });
   }
 
+  // Sort Ascending (Oldest first)
   return filled.sort(
-    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
   );
 }
+
 
 /* ─────────────────────────────────────────
    Filter out non-existing files (404) for the video modal
@@ -129,7 +131,7 @@ export default function MentorList({ guestId }) {
     }
 
     const sortedLocal = [...localItems].sort(
-      (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+      (a, b) => new Date(a.createdAt) - new Date(b.createdAt)
     );
 
     try {
@@ -169,7 +171,7 @@ export default function MentorList({ guestId }) {
         );
 
         const finalSorted = unique.sort(
-          (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+          (a, b) => new Date(a.createdAt) - new Date(b.createdAt)
         );
 
         let actualTotal =
@@ -321,7 +323,11 @@ export default function MentorList({ guestId }) {
       {/* HERO */}
       <header className="mb-6">
         {/* WorldStack - Total Voice Count with Visual Tower */}
-        <div className="mb-6 rounded-2xl border border-pink-500/30 bg-gradient-to-br from-pink-500/10 to-purple-500/10 p-4 md:p-6 overflow-hidden relative">
+        <div className="mb-6 rounded-2xl border border-white/10 bg-gradient-to-br from-[#0f172a] to-[#1e1b4b] p-4 md:p-6 overflow-hidden relative shadow-2xl">
+          {/* Subtle background glow effect */}
+          <div className="absolute top-0 right-0 w-64 h-64 bg-purple-500/20 rounded-full blur-3xl pointer-events-none -translate-y-1/2 translate-x-1/2"></div>
+          <div className="absolute bottom-0 left-0 w-64 h-64 bg-pink-500/20 rounded-full blur-3xl pointer-events-none translate-y-1/2 -translate-x-1/2"></div>
+
           <div className="flex flex-col-reverse md:flex-row items-center justify-between gap-6 z-10 relative">
             {/* Left: 3D Tower Visualization */}
             <div className="w-full md:flex-1 flex items-end justify-center gap-2 h-56 min-h-[224px] relative min-w-[220px] overflow-hidden">
@@ -337,107 +343,86 @@ export default function MentorList({ guestId }) {
                     style={{ perspective: "1000px" }}
                   >
                     {stackItems.map((item, i) => {
-                      // Pyramid shape: bottom (i=0) is largest, top (i=max) is smallest
-                      // i increases from bottom to top, so we use i directly for level
+                      // Pyramid shape logic:
+                      // i is index in ascending array (0=Oldest, Last=Newest).
+                      // We want Oldest at Bottom (Wide), Newest at Top (Narrow).
+                      // So 'level' should increase with i.
                       const level = Math.floor(i / 5);
-                      const height = 32 + level * 4; // Keep height reasonable
-                      // Pyramid: wider at bottom (i=0), narrower at top - make much wider for text
-                      const baseWidth = 200; // Much wider for full text display
-                      const width = baseWidth - level * 8; // Gradual narrowing
-                      const depth = 18 - level * 0.5; // Slightly reduced depth
+                      const height = 32 + level * 4;
+                      const baseWidth = 200;
+                      // Ensure width doesn't invert
+                      const width = Math.max(40, baseWidth - level * 8);
+                      const depth = Math.max(4, 18 - level * 0.5);
                       const delay = i * 0.015;
+
                       const colorSets = [
-                        {
-                          from: "rgb(236, 72, 153)",
-                          via: "rgb(219, 39, 119)",
-                          to: "rgb(190, 24, 93)",
-                        },
-                        {
-                          from: "rgb(168, 85, 247)",
-                          via: "rgb(147, 51, 234)",
-                          to: "rgb(126, 34, 206)",
-                        },
-                        {
-                          from: "rgb(59, 130, 246)",
-                          via: "rgb(37, 99, 235)",
-                          to: "rgb(29, 78, 216)",
-                        },
-                        {
-                          from: "rgb(99, 102, 241)",
-                          via: "rgb(79, 70, 229)",
-                          to: "rgb(67, 56, 202)",
-                        },
-                        {
-                          from: "rgb(244, 63, 94)",
-                          via: "rgb(225, 29, 72)",
-                          to: "rgb(190, 18, 60)",
-                        },
-                        {
-                          from: "rgb(139, 92, 246)",
-                          via: "rgb(124, 58, 237)",
-                          to: "rgb(109, 40, 217)",
-                        },
-                        {
-                          from: "rgb(217, 70, 239)",
-                          via: "rgb(192, 38, 211)",
-                          to: "rgb(162, 28, 175)",
-                        },
+                        // Neon Cyberpunk
+                        { from: "#ec4899", via: "#d946ef", to: "#8b5cf6", shadow: "#d946ef" },
+                        // Electric Blue
+                        { from: "#3b82f6", via: "#6366f1", to: "#8b5cf6", shadow: "#6366f1" },
+                        // Sunset Glow
+                        { from: "#f43f5e", via: "#e11d48", to: "#9f1239", shadow: "#e11d48" },
+                        // Golden Luxury
+                        { from: "#f59e0b", via: "#d97706", to: "#b45309", shadow: "#d97706" },
+                        // Teal Vapor
+                        { from: "#2dd4bf", via: "#0d9488", to: "#115e59", shadow: "#0d9488" },
                       ];
                       const colorSet = colorSets[i % colorSets.length];
-                      const isNew = i === 0 && stackItems.length > 0;
+
+                      // Newest item is at the end of the array
+                      const isNew = i === stackItems.length - 1;
+
+                      // Shadow intensity logic
                       const shadowIntensity = Math.max(0.3, 1 - i * 0.02);
                       const script = item.title || "Recording";
-                      const fontSize = Math.max(14, 20 - level * 1.5); // 3x: 8*1.75, 12*1.67
+                      const fontSize = Math.max(12, 20 - level * 1.5);
 
                       return (
                         <div
-                          key={`block-${item.id || i}-${totalCount}`}
-                          className="tower-block relative"
+                          key={`block-${item.id}`}
+                          className="tower-block relative transition-all duration-500"
                           style={{
                             width: `${width}px`,
                             height: `${height}px`,
                             animation: isNew
-                              ? "stackUp 0.6s ease-out, float 2s ease-in-out infinite 0.6s"
-                              : "stackUp 0.5s ease-out",
-                            animationDelay: `${delay}s`,
-                            animationFillMode: "both",
-                            transformStyle: "preserve-3d",
+                              ? "stackUp 0.8s cubic-bezier(0.34, 1.56, 0.64, 1)"
+                              : "none",
+                            zIndex: stackItems.length - i,
+                            transform: "translateZ(0)",
                           }}
                         >
-                          {/* Front Face with Script Text */}
+                          {/* Front Face */}
                           <div
-                            className={`absolute inset-0 rounded-t-lg shadow-xl border border-white/10 flex items-center justify-center ${isNew
-                              ? "ring-2 ring-pink-300 ring-offset-2"
-                              : ""
-                              }`}
+                            className={`absolute inset-0 rounded-xl border border-white/20 flex items-center justify-center overflow-hidden transition-all duration-300 ${isNew ? "ring-4 ring-white/50 ring-offset-2 ring-offset-transparent" : ""}`}
                             style={{
-                              background: `linear-gradient(to bottom, ${colorSet.from}, ${colorSet.via}, ${colorSet.to})`,
-                              transform: `translateZ(${depth / 2}px)`,
-                              boxShadow: `0 ${depth}px ${depth * 2
-                                }px rgba(0,0,0,${shadowIntensity})`,
+                              background: `linear-gradient(135deg, ${colorSet.from}, ${colorSet.via}, ${colorSet.to})`,
+                              boxShadow: `0 0 20px ${colorSet.shadow}80, inset 0 0 10px rgba(255,255,255,0.3)`,
                             }}
                           >
+                            {/* Sheen Effect */}
+                            <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/20 to-transparent opacity-0 group-hover:opacity-100 animate-[sheen_4s_infinite_linear]" style={{ backgroundSize: "200% 100%" }}></div>
+
+                            {/* Glass Reflection Top */}
+                            <div className="absolute top-0 left-0 right-0 h-1/2 bg-gradient-to-b from-white/20 to-transparent pointer-events-none"></div>
+
                             {/* Script Text */}
                             <div
-                              className="text-white font-semibold text-center px-3 leading-tight"
+                              className="text-white font-bold text-center px-2 leading-tight relative z-10"
                               style={{
                                 fontSize: `${fontSize}px`,
-                                textShadow: "0 2px 4px rgba(0,0,0,0.6)",
+                                textShadow: "0 2px 4px rgba(0,0,0,0.5)",
+                                letterSpacing: "0.5px",
                                 maxWidth: "100%",
                                 overflow: "hidden",
                                 textOverflow: "ellipsis",
                                 whiteSpace: "nowrap",
+                                fontFamily: "'Outfit', sans-serif",
                               }}
                               title={script}
                             >
-                              {script.length > 40
-                                ? script.substring(0, 40) + "..."
-                                : script}
+                              {script.length > 30 ? script.substring(0, 30) + ".." : script}
                             </div>
                           </div>
-
-                          {/* Top Face - removed for cleaner look */}
-                          {/* Side Faces - removed to eliminate ghosting effect */}
                         </div>
                       );
                     })}

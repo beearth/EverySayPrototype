@@ -3,9 +3,9 @@ const translations = {
   en: {
     tutorial: {
       step1: {
-        title: "Welcome to SPACE STACK! 👋",
+        title: "Welcome to Eternal Stack! 👋",
         content: {
-          0: "SPACE STACK transforms positive energy from Faith, Fandom, and Support into digital assets.",
+          0: "Eternal Stack transforms positive energy from Faith, Fandom, and Support into digital assets.",
           1: "We digitize every 'Positive Choice' you make in real-time as a Stack.",
           2: "Accumulated Stacks become powerful social proof for viral growth.",
         },
@@ -89,7 +89,7 @@ const translations = {
       error: "Error",
     },
     main: {
-      title: "SPACE STACK Cheer Hub",
+      title: "Eternal Stack Cheer Hub",
       searchPlaceholder: "Search events",
       whoToCheer: "Who to Cheer",
       cheerNow: "Cheer Now",
@@ -113,9 +113,9 @@ const translations = {
   ko: {
     tutorial: {
       step1: {
-        title: "SPACE STACK에 오신 것을 환영합니다! 👋",
+        title: "Eternal Stack에 오신 것을 환영합니다! 👋",
         content: {
-          0: "SPACE STACK는 신앙, 팬덤, 후원의 긍정 에너지를 디지털 자산(Stack)으로 전환합니다.",
+          0: "Eternal Stack는 신앙, 팬덤, 후원의 긍정 에너지를 디지털 자산(Stack)으로 전환합니다.",
           1: "당신의 모든 '긍정적 선택'은 실시간으로 기록되어 스택이 됩니다.",
           2: "축적된 스택은 강력한 사회적 증거가 되어 세상을 변화시킵니다.",
         },
@@ -199,7 +199,7 @@ const translations = {
       error: "오류",
     },
     main: {
-      title: "SPACE STACK 치어 허브",
+      title: "Eternal Stack 치어 허브",
       searchPlaceholder: "이벤트 검색",
       whoToCheer: "응원하기",
       cheerNow: "응원하기",

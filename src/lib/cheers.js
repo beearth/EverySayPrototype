@@ -6,7 +6,7 @@ import { videos } from "./videos";
  */
 export const cheers = videos.map((v, i) => ({
   id: `c-${v.id}`,
-  title: v.title,             // e.g., SPACE STACK Demo 01
+  title: v.title,             // e.g., Eternal Stack Demo 01
   subtitle: i % 2 === 0 ? "Community support" : "Global fandom support",
   video: v.src,               // <-- connect the actual video file
   // optional fallback image if you have: image: "/images/xxx.jpg",

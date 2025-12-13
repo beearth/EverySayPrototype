@@ -61,7 +61,7 @@ export default function App() {
       </div>
 
       <footer className="mt-10 border-t border-border px-4 py-6 text-center text-xs text-neutral-500">
-        ⚠️ This is a prototype of the SPACE STACK Support Platform.
+        ⚠️ This is a prototype of the Eternal Stack Support Platform.
         All recorded voices are temporary and deleted within 180 days.
         No data is shared or used commercially.
       </footer>

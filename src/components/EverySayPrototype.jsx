@@ -35,7 +35,7 @@ export default function EverySayPrototype() {
 
   return (
     <div className="max-w-3xl mx-auto p-6 border border-neutral-800 rounded-2xl bg-neutral-950 text-neutral-100">
-      <h2 className="text-2xl font-bold mb-6 text-pink-400">SPACE STACK Prototype</h2>
+      <h2 className="text-2xl font-bold mb-6 text-pink-400">Eternal Stack Prototype</h2>
 
       {/* 상단 상태 */}
       <div className="grid grid-cols-3 gap-3 mb-6">

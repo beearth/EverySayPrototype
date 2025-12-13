@@ -361,7 +361,7 @@ export default function CheerModal({
         {/* Header */}
         <div className="mb-4 flex items-center justify-between">
           <h3 className="text-lg font-semibold">
-            {item?.title || "SPACE STACK Cheer"}
+            {item?.title || "Eternal Stack Cheer"}
           </h3>
           <button
             onClick={() => {
@@ -516,7 +516,7 @@ export default function CheerModal({
             <div className="w-full max-w-lg rounded-2xl border border-white/10 bg-[#0b1220] p-5 shadow-2xl">
               <h4 className="text-lg font-semibold mb-2">Consent required</h4>
               <p className="text-sm text-neutral-300 mb-3">
-                By sending, you agree that your voice may be used in the SPACE STACK prototype and can be stored up to 180 days.
+                By sending, you agree that your voice may be used in the Eternal Stack prototype and can be stored up to 180 days.
               </p>
               <ul className="list-disc pl-5 text-[13px] text-neutral-400 space-y-1 mb-4">
                 <li>

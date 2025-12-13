@@ -1,8 +1,7 @@
 import { useState } from "react";
-import { getLanguage, t } from "../lib/i18n";
+import { getLanguage, setLanguage, t } from "../lib/i18n";
 
-function getTutorialSteps() {
-  const lang = getLanguage();
+function getTutorialSteps(lang) {
   return [
     {
       title: t("tutorial.step1.title", lang),
@@ -139,8 +138,15 @@ function getTutorialSteps() {
 export default function TutorialModal({ onComplete }) {
   const [currentStep, setCurrentStep] = useState(0);
   const [dontShowAgain, setDontShowAgain] = useState(false);
-  const lang = getLanguage();
-  const TUTORIAL_STEPS = getTutorialSteps();
+  const [currentLang, setCurrentLang] = useState(getLanguage());
+
+  const TUTORIAL_STEPS = getTutorialSteps(currentLang);
+
+  const toggleLanguage = () => {
+    const newLang = currentLang === "en" ? "ko" : "en";
+    setLanguage(newLang);
+    setCurrentLang(newLang);
+  };
 
   const handleNext = () => {
     if (currentStep < TUTORIAL_STEPS.length - 1) {
@@ -187,12 +193,21 @@ export default function TutorialModal({ onComplete }) {
             <span className="text-sm text-neutral-500">
               {currentStep + 1} / {TUTORIAL_STEPS.length}
             </span>
-            <button
-              onClick={handleSkip}
-              className="text-sm text-neutral-400 hover:text-neutral-300 transition-colors"
-            >
-              {t("tutorial.skip", lang)}
-            </button>
+            <div className="flex gap-4 items-center">
+              <button
+                onClick={toggleLanguage}
+                className="text-xs px-2 py-1 rounded border border-neutral-600 hover:bg-neutral-800 transition-colors"
+                title="Switch Language / 언어 변경"
+              >
+                {currentLang === "en" ? "🇰🇷 KO" : "🇺🇸 EN"}
+              </button>
+              <button
+                onClick={handleSkip}
+                className="text-sm text-neutral-400 hover:text-neutral-300 transition-colors"
+              >
+                {t("tutorial.skip", currentLang)}
+              </button>
+            </div>
           </div>
           <div className="w-full bg-neutral-800 rounded-full h-2">
             <div
@@ -218,7 +233,7 @@ export default function TutorialModal({ onComplete }) {
               onClick={handlePrevious}
               className="flex-1 px-6 py-3 rounded-2xl border border-border bg-background hover:bg-muted text-foreground font-medium transition-colors"
             >
-              {t("tutorial.previous", lang)}
+              {t("tutorial.previous", currentLang)}
             </button>
           )}
           <button
@@ -226,7 +241,7 @@ export default function TutorialModal({ onComplete }) {
             className={`flex-1 px-6 py-3 rounded-2xl text-white font-semibold transition-colors
               bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600`}
           >
-            {isLastStep ? t("tutorial.start", lang) : t("tutorial.next", lang)}
+            {isLastStep ? t("tutorial.start", currentLang) : t("tutorial.next", currentLang)}
           </button>
         </div>
 
@@ -240,7 +255,7 @@ export default function TutorialModal({ onComplete }) {
             onChange={(e) => setDontShowAgain(e.target.checked)}
           />
           <label htmlFor="dontShowAgain" className="text-sm text-neutral-400 cursor-pointer">
-            {t("tutorial.dontShowAgain", lang)}
+            {t("tutorial.dontShowAgain", currentLang)}
           </label>
         </div>
       </div>
